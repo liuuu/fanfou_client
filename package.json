@@ -5,6 +5,7 @@
   "dependencies": {
     "apollo-cache-inmemory": "^1.1.5",
     "apollo-client": "^2.2.0",
+    "apollo-link-context": "^1.0.3",
     "apollo-link-http": "^1.3.2",
     "autoprefixer": "7.1.6",
     "babel-core": "6.26.0",
@@ -32,6 +33,8 @@
     "graphql-tag": "^2.6.1",
     "html-webpack-plugin": "2.29.0",
     "jest": "20.0.4",
+    "mobx": "^3.4.1",
+    "mobx-react": "^4.3.5",
     "object-assign": "4.1.1",
     "postcss-flexbugs-fixes": "3.2.0",
     "postcss-loader": "2.0.8",
@@ -41,6 +44,8 @@
     "react-apollo": "^2.0.4",
     "react-dev-utils": "^5.0.0",
     "react-dom": "^16.2.0",
+    "react-router-dom": "^4.2.2",
+    "semantic-ui-react": "^0.77.2",
     "style-loader": "0.19.0",
     "sw-precache-webpack-plugin": "0.11.4",
     "url-loader": "0.6.2",
@@ -95,5 +100,8 @@
   },
   "eslintConfig": {
     "extends": "react-app"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-decorators-legacy": "^1.3.4"
   }
 }
