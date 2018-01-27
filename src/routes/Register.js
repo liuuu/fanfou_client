@@ -47,9 +47,12 @@ class LoginForm extends Component {
 
   saveUserData = (id, token) => {
     localStorage.setItem('xtoken', token);
+    localStorage.setItem('userId', id);
   };
 
   handleSubmit = async () => {
+    console.log('handleSubmit');
+
     if (this.isLoginForm) {
       const result = await this.props.authenticateUserMutation({
         variables: {
@@ -58,7 +61,7 @@ class LoginForm extends Component {
         },
       });
 
-      console.log('result', result);
+      console.log('login result', result);
 
       const { user, ok, error } = result.data.login;
       this.saveUserData(user._id, user.token);
@@ -71,7 +74,7 @@ class LoginForm extends Component {
           password: this.password,
         },
       });
-      console.log('result', result);
+      console.log('sign result', result);
 
       const { user, ok, error } = result.data.signup;
       this.saveUserData(user._id, user.token);
@@ -115,7 +118,7 @@ class LoginForm extends Component {
                     onChange={this.handlePassword}
                   />
 
-                  <Button color="teal" fluid size="large">
+                  <Button color="teal" fluid size="large" onClick={this.handleSubmit}>
                     Login
                   </Button>
                 </Segment>
@@ -211,6 +214,7 @@ const SIGNUP_USER_MUTATION = gql`
         _id
         token
         email
+        num
       }
       ok
       error
@@ -226,12 +230,15 @@ const AUTHENTICATE_USER_MUTATION = gql`
         _id
         token
         email
+        num
       }
       ok
       error
     }
   }
 `;
+
+
 
 export default compose(
   graphql(SIGNUP_USER_MUTATION, { name: 'signupUserMutation' }),

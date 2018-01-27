@@ -6,3 +6,7 @@
   animation: App-logo-spin infinite 20s linear;
   height: 80px;
 }
+
+.test:hover {
+  cursor: pointer;
+}

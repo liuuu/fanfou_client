@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Form, TextArea, Button } from 'semantic-ui-react';
-import { graphql } from 'react-apollo';
+import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { QUERY_ALL_MESSAGES } from './MessageContainer';
 
@@ -16,8 +16,11 @@ class CreateMessageForm extends Component {
   handleSubmit = e => {
     // optimistic and fetchmore
     console.log('this.props', this.props);
-    // this.props.mutate();
+
     const { value } = this.state;
+
+    // not work cause the readQuery only require the root query as the skip:0 intererting
+    const num = parseInt(localStorage.getItem('num'), 10) || 0;
 
     const result = this.props.createMessageMutation({
       variables: {
@@ -31,24 +34,28 @@ class CreateMessageForm extends Component {
           error: null,
           message: {
             __typename: 'Message',
-            _id: '-1',
-            userId: '39949359934',
+            _id: +new Date(),
+            userId: 'faked id',
             content: value,
             createdAt: +new Date(),
+            votes: [],
+            owner: 'fsf',
           },
         },
       },
       update: (proxy, { data: { createMessage } }) => {
-        console.log('form update', data);
+        console.log('proxy', proxy);
 
-        const data = proxy.readQuery({ query: QUERY_ALL_MESSAGES });
+        const data = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
+
+        console.log('data from previous store by createNewMessage', data);
 
         data.allMessages.unshift(createMessage.message);
 
-        proxy.writeQuery({ query: QUERY_ALL_MESSAGES, data });
+        proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data });
       },
     });
-    console.log('result', result);
+    // console.log('result', result);
   };
   render() {
     return (
@@ -77,9 +84,15 @@ const CREATE_MESSAGE = gql`
         content
         createdAt
         userId
+        owner
+        votes {
+          userId
+        }
       }
     }
   }
 `;
 
-export default graphql(CREATE_MESSAGE, { name: 'createMessageMutation' })(CreateMessageForm);
+export default withApollo(
+  graphql(CREATE_MESSAGE, { name: 'createMessageMutation' })(CreateMessageForm)
+);

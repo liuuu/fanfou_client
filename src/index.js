@@ -11,6 +11,9 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import gql from 'graphql-tag';
 import { ApolloProvider } from 'react-apollo';
 import { setContext } from 'apollo-link-context';
+import { WebSocketLink } from 'apollo-link-ws';
+import { split } from 'apollo-link';
+import { getMainDefinition } from 'apollo-utilities';
 
 const endPoint = 'http://localhost:5555/graphql';
 
@@ -28,7 +31,7 @@ const tokenLink = setContext((req, { headers }) => {
 
 const httpLink = new HttpLink({ uri: endPoint });
 
-const link = tokenLink.concat(httpLink);
+const linkWithToken = tokenLink.concat(httpLink);
 
 // const httpLink = new HttpLink({ uri: 'https://q815p14lp.lp.gql.zone/graphql' });
 // const authLink = setContext(async (req, { headers }) => {
@@ -48,23 +51,46 @@ const link = tokenLink.concat(httpLink);
 //   cache: new InMemoryCache(),
 // });
 
+const wsLink = new WebSocketLink({
+  uri: 'ws://localhost:5555/subscriptions',
+  options: {
+    reconnect: true,
+    timeout: 30000,
+    connectionCallback: error => {
+      console.log('ws connention callback', error);
+      return null;
+    },
+  },
+});
+
+const link = split(
+  // split based on operation type
+  ({ query }) => {
+    const { kind, operation } = getMainDefinition(query);
+    return kind === 'OperationDefinition' && operation === 'subscription';
+  },
+  wsLink,
+  linkWithToken
+);
+
 const client = new ApolloClient({
   link,
   cache: new InMemoryCache(),
   connectToDevTools: true,
 });
 
-client
-  .query({
-    query: gql`
-      {
-        allUsers {
-          name
-        }
-      }
-    `,
-  })
-  .then(console.log);
+// test for
+// client
+//   .query({
+//     query: gql`
+//       {
+//         allUsers {
+//           name
+//         }
+//       }
+//     `,
+//   })
+//   .then(console.log);
 
 ReactDOM.render(
   <ApolloProvider client={client}>

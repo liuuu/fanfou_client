@@ -20,7 +20,7 @@ import MessageContainer from '../components/MessageContainer';
 
 const ContainerExampleFluid = () => (
   <div>
-    <Segment textAlign="center" style={{ minHeight: 1700, padding: '1em 0em' }} vertical>
+    <Segment textAlign="center" style={{ minHeight: 100, padding: '1em 0em' }} vertical>
       <Container>
         <Menu pointing secondary size="large">
           <Menu.Item>
