@@ -29,7 +29,7 @@ class CreateMessageForm extends Component {
       optimisticResponse: {
         __typename: 'Mutation',
         createMessage: {
-          __typename: '__MessageResponse',
+          __typename: 'MessageResponse',
           ok: true,
           error: null,
           message: {
@@ -46,13 +46,23 @@ class CreateMessageForm extends Component {
       update: (proxy, { data: { createMessage } }) => {
         console.log('proxy', proxy);
 
-        const data = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
+        const readData = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
+        // {
+        //   allMessage:[]
+        // }
 
-        console.log('data from previous store by createNewMessage', data);
+        console.log('readData', readData);
+        console.log('readData.length', readData.allMessages.length);
+        console.log('readData.allMessages', readData.allMessages);
+        console.log('readData.allMessages', readData.allMessages[0]);
 
-        data.allMessages.unshift(createMessage.message);
+        console.log('createMessage', createMessage);
 
-        proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data });
+        readData.allMessages.unshift(createMessage.message);
+
+        // console.log('readData', readData);
+
+        proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data: readData });
       },
     });
     // console.log('result', result);

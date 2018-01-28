@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { Item, Label, Button } from 'semantic-ui-react';
-import { graphql, withApollo } from 'react-apollo';
+import { graphql, withApollo, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 import TimeAgo from 'react-timeago';
 import { Link } from 'react-router-dom';
 import MessageItem from './MessageItem';
 
 import ava from '../jenny.jpg';
+import CommentGroup from 'semantic-ui-react/dist/commonjs/views/Comment/CommentGroup';
 
 const paragraph = 'lorem sjdklf sadljkf';
 
@@ -28,6 +29,7 @@ class MessageContainer extends Component {
   componentWillMount() {
     const userId = localStorage.getItem('userId');
     console.log('userId from localStorage', userId);
+    console.log('this.props in will Mount', this.props);
 
     this.unsubscribe = this.subscribe(userId);
   }
@@ -89,6 +91,86 @@ class MessageContainer extends Component {
     });
   };
 
+  handleVote = (e, data, isVoted, m) => {
+    // console.log('data', data, isVoted);
+
+    const userId = localStorage.getItem('userId');
+    if (!isVoted) {
+      this.props.createVoteMutation({
+        variables: {
+          _id: m._id,
+        },
+        optimisticResponse: {
+          __typename: 'Mutation',
+          createVote: {
+            __typename: 'Message',
+            content: m.content,
+            userId: userId,
+            createdAt: m.createdAt,
+            _id: m._id,
+            owner: m.owner,
+            votes: [
+              ...m.votes,
+              {
+                __typename: 'Vote',
+                userId: userId,
+              },
+            ],
+          },
+        },
+        update: (proxy, { data: { createVote } }) => {
+          console.log('proxy', proxy);
+          // optimistic data already write in the memory store??
+          const data = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
+          console.log('data from previous store by createVote', data);
+          const idx = data.allMessages.findIndex(m => m._id === createVote._id);
+          console.log('data', data);
+          console.log('data.allMessages[idx]', data.allMessages[idx]);
+
+          data.allMessages[idx].votes = createVote.votes;
+
+          console.log('data', data);
+
+          proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data });
+        },
+      });
+    } else {
+      // alresdy voted and find to remove
+      console.log('ss');
+
+      const idx = m.votes.findIndex(m => m.userId === userId);
+      const opsVotes = m.votes.slice().splice(idx, 1);
+      this.props.removeVoteMutation({
+        variables: {
+          _id: m._id,
+        },
+        optimisticResponse: {
+          __typename: 'Mutation',
+          removeVote: {
+            __typename: 'Message',
+            content: m.content,
+            userId: userId,
+            createdAt: m.createdAt,
+            _id: m._id,
+            owner: m.owner,
+            votes: [...opsVotes],
+          },
+        },
+        update: (proxy, { data: { removeVote } }) => {
+          const data = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
+          console.log('enter?');
+          console.log('createVote', removeVote);
+
+          const idx = data.allMessages.findIndex(m => m._id === removeVote._id);
+
+          data.allMessages[idx].votes = removeVote.votes;
+
+          proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data });
+        },
+      });
+    }
+  };
+
   render() {
     if (this.props.allMessageQuery.loading) {
       return <div>loading</div>;
@@ -100,7 +182,7 @@ class MessageContainer extends Component {
       return [
         <Item.Group divided key="item">
           {allMessages.map(m => {
-            return <MessageItem m={m} key={m._id} />;
+            return <MessageItem m={m} key={m._id} handleVote={this.handleVote} />;
           })}
         </Item.Group>,
         <Button onClick={this.handleLoadMore} key="button">
@@ -159,15 +241,47 @@ export const QUERY_ALL_MESSAGES = gql`
 </Item>; */
 }
 
-export default withApollo(
-  graphql(QUERY_ALL_MESSAGES, {
-    name: 'allMessageQuery',
-    options: props => {
-      return {
-        variables: {
-          skip: 0,
-        },
-      };
-    },
-  })(MessageContainer)
-);
+const withData = graphql(QUERY_ALL_MESSAGES, {
+  name: 'allMessageQuery',
+  options: props => {
+    return {
+      variables: {
+        skip: 0,
+      },
+    };
+  },
+});
+
+const MUTATE_CREATE_VOTE = gql`
+  mutation createVote($_id: String!) {
+    createVote(_id: $_id) {
+      content
+      userId
+      createdAt
+      _id
+      owner
+      votes {
+        userId
+      }
+    }
+  }
+`;
+const MUTATE_REMOVE_VOTE = gql`
+  mutation removeVote($_id: String!) {
+    removeVote(_id: $_id) {
+      content
+      userId
+      createdAt
+      _id
+      owner
+      votes {
+        userId
+      }
+    }
+  }
+`;
+
+const withCreateVoteMutation = graphql(MUTATE_CREATE_VOTE, { name: 'createVoteMutation' });
+const withRemoveVoteMutation = graphql(MUTATE_REMOVE_VOTE, { name: 'removeVoteMutation' });
+
+export default compose(withData, withRemoveVoteMutation, withCreateVoteMutation)(MessageContainer);

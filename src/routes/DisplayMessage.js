@@ -3,10 +3,94 @@ import { Item, Label, Container, Menu, Button } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import TimeAgo from 'react-timeago';
 import gql from 'graphql-tag';
-import { graphql } from 'react-apollo';
+import { graphql, compose } from 'react-apollo';
+
 import ava from '../jenny.jpg';
 
+import MessageItem from '../components/MessageItem';
+import { QUERY_ALL_MESSAGES } from '../components/MessageContainer';
+
 class DisplayMessage extends Component {
+  handleVote = (e, data, isVoted, m) => {
+    // console.log('data', data, isVoted);
+
+    const userId = localStorage.getItem('userId');
+    if (!isVoted) {
+      this.props.createVoteMutation({
+        variables: {
+          _id: m._id,
+        },
+        optimisticResponse: {
+          __typename: 'Mutation',
+          createVote: {
+            __typename: 'Message',
+            content: m.content,
+            userId: userId,
+            createdAt: m.createdAt,
+            _id: m._id,
+            owner: m.owner,
+            votes: [
+              ...m.votes,
+              {
+                __typename: 'Vote',
+                userId: userId,
+              },
+            ],
+          },
+        },
+        update: (proxy, { data: { createVote } }) => {
+          console.log('proxy', proxy);
+          // optimistic data already write in the memory store??
+          const data = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
+          console.log('data from previous store by createVote', data);
+          const idx = data.allMessages.findIndex(m => m._id === createVote._id);
+          console.log('data', data);
+          console.log('data.allMessages[idx]', data.allMessages[idx]);
+
+          data.allMessages[idx].votes = createVote.votes;
+
+          console.log('data', data);
+
+          proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data });
+        },
+      });
+    } else {
+      // alresdy voted and find to remove
+      console.log('ss');
+
+      const idx = m.votes.findIndex(m => m.userId === userId);
+      const opsVotes = m.votes.slice().splice(idx, 1);
+      this.props.removeVoteMutation({
+        variables: {
+          _id: m._id,
+        },
+        optimisticResponse: {
+          __typename: 'Mutation',
+          removeVote: {
+            __typename: 'Message',
+            content: m.content,
+            userId: userId,
+            createdAt: m.createdAt,
+            _id: m._id,
+            owner: m.owner,
+            votes: [...opsVotes],
+          },
+        },
+        update: (proxy, { data: { removeVote } }) => {
+          const data = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
+          console.log('enter?');
+          console.log('createVote', removeVote);
+
+          const idx = data.allMessages.findIndex(m => m._id === removeVote._id);
+
+          data.allMessages[idx].votes = removeVote.votes;
+
+          proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data });
+        },
+      });
+    }
+  };
+
   render() {
     if (this.props.queryMessage.loading) {
       return <div>loading</div>;
@@ -38,24 +122,7 @@ class DisplayMessage extends Component {
           </Menu.Item>
         </Menu>
         <div style={{ maxWidth: '960px', margin: '0 auto', textAlign: 'left' }}>
-          <Item key={m._id}>
-            <Item.Image size="mini" src={ava} />
-
-            <Item.Content>
-              <Item.Header as="a">{m.userId}</Item.Header>
-              <Item.Meta>
-                {/* <span className="cinema">{m.createdAt}</span> */}
-                <Link to={`/message/${m._id}`}>
-                  <TimeAgo date={new Date(m.createdAt).toUTCString()} live={false} />
-                </Link>
-              </Item.Meta>
-              <Item.Description>{m.content}</Item.Description>
-              <Item.Extra>
-                <Label>IMAX</Label>
-                <Label icon="globe" content="Additional Languages" />
-              </Item.Extra>
-            </Item.Content>
-          </Item>
+          <MessageItem m={m} handleVote={this.handleVote} />
         </div>
       </Container>
     );
@@ -63,8 +130,8 @@ class DisplayMessage extends Component {
 }
 
 const QUERY_SINGLE_MESSAGE = gql`
-  query queryMessage($id: String!) {
-    message(id: $id) {
+  query queryMessage($_id: String!) {
+    message(_id: $_id) {
       content
       userId
       createdAt
@@ -77,13 +144,46 @@ const QUERY_SINGLE_MESSAGE = gql`
   }
 `;
 
-export default graphql(QUERY_SINGLE_MESSAGE, {
-  name: 'queryMessage',
-  options: props => {
-    return {
-      variables: {
-        id: props.match.params.messageId,
-      },
-    };
-  },
-})(DisplayMessage);
+const MUTATE_CREATE_VOTE = gql`
+  mutation createVote($_id: String!) {
+    createVote(_id: $_id) {
+      content
+      userId
+      createdAt
+      _id
+      owner
+      votes {
+        userId
+      }
+    }
+  }
+`;
+const MUTATE_REMOVE_VOTE = gql`
+  mutation removeVote($_id: String!) {
+    removeVote(_id: $_id) {
+      content
+      userId
+      createdAt
+      _id
+      owner
+      votes {
+        userId
+      }
+    }
+  }
+`;
+
+export default compose(
+  graphql(QUERY_SINGLE_MESSAGE, {
+    name: 'queryMessage',
+    options: props => {
+      return {
+        variables: {
+          _id: props.match.params.messageId,
+        },
+      };
+    },
+  }),
+  graphql(MUTATE_CREATE_VOTE, { name: 'createVoteMutation' }),
+  graphql(MUTATE_REMOVE_VOTE, { name: 'removeVoteMutation' })
+)(DisplayMessage);

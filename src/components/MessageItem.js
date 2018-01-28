@@ -11,7 +11,12 @@ class MessageItem extends Component {
     e.target.style.color = 'red';
   };
   render() {
-    const { m } = this.props;
+    const { m, handleVote } = this.props;
+    //check if the user has been voted
+    const userId = localStorage.getItem('userId');
+    console.log('useId', userId);
+    const isVoted = m.votes.findIndex(v => v.userId === userId) > -1;
+
     return (
       <Item key={m._id}>
         <Item.Image size="mini" src={ava} />
@@ -26,16 +31,16 @@ class MessageItem extends Component {
           </Item.Meta>
           <Item.Description>{m.content}</Item.Description>
           <Item.Extra>
+            <Label onClick={(e, data) => handleVote(e, data, isVoted, m)}>
+              <Icon name="heart" color={isVoted ? 'red' : 'grey'} />
+              {m.votes.length}
+            </Label>
             <Label>
-              <Icon name="heart" color="" />
+              <Icon name="reply" />
               15
             </Label>
             <Label>
-              <Icon name="reply" color="" />
-              15
-            </Label>
-            <Label>
-              <Icon name="mail outline" color="" />
+              <Icon name="mail outline" />
             </Label>
 
             <Label basic className="test">
