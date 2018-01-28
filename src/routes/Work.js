@@ -17,9 +17,10 @@ import {
 import { Link } from 'react-router-dom';
 import CreateMessageForm from '../components/CreateMessageForm';
 import MessageContainer from '../components/MessageContainer';
+import UserCard from '../components/UserCard';
 
 const ContainerExampleFluid = () => (
-  <div>
+  <div className="all-message">
     <Segment textAlign="center" style={{ minHeight: 100, padding: '1em 0em' }} vertical>
       <Container>
         <Menu pointing secondary size="large">
@@ -51,15 +52,7 @@ const ContainerExampleFluid = () => (
             </Grid.Column>
             <Grid.Column width={4}>
               <div style={{ backgroundColor: '#e3f2da' }}>
-                <p>
-                  Domestic dogs inherited complex behaviors, such as bite inhibition, from their
-                  wolf ancestors, which would have been pack hunters with complex body language.
-                  These sophisticated forms of social cognition and communication may account for
-                  their trainability, playfulness, and ability to fit into human households and
-                  social situations, and these attributes have given dogs a relationship with humans
-                  that has enabled them to become one of the most successful species on the planet
-                  today.
-                </p>
+                <UserCard />
               </div>
             </Grid.Column>
           </Grid>

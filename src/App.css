@@ -10,3 +10,14 @@
 .test:hover {
   cursor: pointer;
 }
+
+.all-message {
+  height: 100vh;
+  overflow: auto;
+  background: #e6ecf1;
+  /* background: url(http://static.fanfou.com/img/bg/3.jpg) repeat; */
+}
+
+.all-container {
+  background: wheat;
+}
