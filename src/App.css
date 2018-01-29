@@ -21,3 +21,7 @@
 .all-container {
   background: wheat;
 }
+
+.delete-label {
+  background-color: rgba(red, green, blue, 0) !important;
+}

@@ -45,9 +45,10 @@ class LoginForm extends Component {
     }
   };
 
-  saveUserData = (id, token) => {
+  saveUserData = (id, token, avatarUrl) => {
     localStorage.setItem('xtoken', token);
     localStorage.setItem('userId', id);
+    localStorage.setItem('avatartUrl', avatarUrl);
   };
 
   handleSubmit = async () => {
@@ -63,8 +64,8 @@ class LoginForm extends Component {
 
       console.log('login result', result);
 
-      const { user, ok, error } = result.data.login;
-      this.saveUserData(user._id, user.token);
+      const { user, ok, error, avatarUrl } = result.data.login;
+      this.saveUserData(user._id, user.token, user.avatarUrl);
     } else {
       // sign up process
       const result = await this.props.signupUserMutation({
@@ -77,7 +78,7 @@ class LoginForm extends Component {
       console.log('sign result', result);
 
       const { user, ok, error } = result.data.signup;
-      this.saveUserData(user._id, user.token);
+      this.saveUserData(user._id, user.token, user.avatarUrl);
     }
     // this.props.history.push('/');
   };
@@ -237,8 +238,6 @@ const AUTHENTICATE_USER_MUTATION = gql`
     }
   }
 `;
-
-
 
 export default compose(
   graphql(SIGNUP_USER_MUTATION, { name: 'signupUserMutation' }),

@@ -16,7 +16,7 @@ class UserCard extends Component {
       <div>
         <Card>
           <Card.Content>
-            <Image size="tiny" src={ava} />
+            <Image size="tiny" src={user.avatarUrl} />
             <Divider />
             <Card.Header>{`@${user.name}`}</Card.Header>
             <Card.Meta>我是一个粉刷匠, 粉刷本领强</Card.Meta>
@@ -62,6 +62,7 @@ const QUERY_USER = gql`
         _id
       }
       messageCount
+      avatarUrl
     }
   }
 `;

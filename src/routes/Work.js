@@ -52,7 +52,7 @@ const ContainerExampleFluid = () => (
             </Grid.Column>
             <Grid.Column width={4}>
               <div style={{ backgroundColor: '#e3f2da' }}>
-                <UserCard />
+                {localStorage.getItem('userId') && <UserCard />}
               </div>
             </Grid.Column>
           </Grid>

@@ -1,21 +1,32 @@
 import React, { Component } from 'react';
-import { Form, TextArea, Button } from 'semantic-ui-react';
+import { Form, TextArea, Button, Progress } from 'semantic-ui-react';
 import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { QUERY_ALL_MESSAGES } from './MessageContainer';
 
 class CreateMessageForm extends Component {
-  state = { value: '' };
+  state = { value: '', percent: 0 };
 
   handleChange = e => {
+    if (e.target.value.length > 20) {
+      this.setState({
+        value: e.target.value.slice(0, 20),
+        percent: e.target.value.trim().length * 100 / 20,
+      });
+      return;
+    }
     this.setState({
-      value: e.target.value,
+      value: e.target.value.trim(),
+      percent: e.target.value.trim().length * 100 / 20,
     });
   };
 
   handleSubmit = e => {
     // optimistic and fetchmore
     console.log('this.props', this.props);
+    if (!this.state.value) {
+      return;
+    }
 
     const { value } = this.state;
 
@@ -40,6 +51,7 @@ class CreateMessageForm extends Component {
             createdAt: +new Date(),
             votes: [],
             owner: 'fsf',
+            avatarUrl: localStorage.getItem('avatarUrl'),
           },
         },
       },
@@ -68,17 +80,23 @@ class CreateMessageForm extends Component {
     // console.log('result', result);
   };
   render() {
+    console.log('this.state.percent', this.state.percent);
+
     return (
       <Form onSubmit={this.handleSubmit}>
-        <Form.Field
-          control={TextArea}
-          label="你在做什么"
-          placeholder="Tell us more about you..."
-          value={this.state.value}
-          onChange={this.handleChange}
-        />
-
-        <Form.Field control={Button}>Submit</Form.Field>
+        <div>
+          <Form.Field
+            control={TextArea}
+            label="你在做什么"
+            placeholder="Tell us more about you..."
+            value={this.state.value}
+            onChange={this.handleChange}
+          />
+        </div>
+        <Progress percent={this.state.percent} attached="bottom" />
+        <div>
+          <Form.Field control={Button}>Submit</Form.Field>
+        </div>
       </Form>
     );
   }
@@ -98,6 +116,7 @@ const CREATE_MESSAGE = gql`
         votes {
           userId
         }
+        avatarUrl
       }
     }
   }

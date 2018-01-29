@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import MessageItem from './MessageItem';
 
 import ava from '../jenny.jpg';
-import CommentGroup from 'semantic-ui-react/dist/commonjs/views/Comment/CommentGroup';
+import MessageModal from '../components/MessageModal';
 
 const paragraph = 'lorem sjdklf sadljkf';
 
@@ -22,10 +22,14 @@ const newMessageSubscription = gql`
         userId
       }
       owner
+      avatarUrl
     }
   }
 `;
 class MessageContainer extends Component {
+  state = {
+    open: false,
+  };
   componentWillMount() {
     const userId = localStorage.getItem('userId');
     console.log('userId from localStorage', userId);
@@ -109,6 +113,7 @@ class MessageContainer extends Component {
             createdAt: m.createdAt,
             _id: m._id,
             owner: m.owner,
+            avatarUrl: m.avatarUrl,
             votes: [
               ...m.votes,
               {
@@ -154,6 +159,7 @@ class MessageContainer extends Component {
             _id: m._id,
             owner: m.owner,
             votes: [...opsVotes],
+            avatarUrl: m.avatarUrl,
           },
         },
         update: (proxy, { data: { removeVote } }) => {
@@ -171,6 +177,87 @@ class MessageContainer extends Component {
     }
   };
 
+  handleRtClick = m => {
+    // console.log('modalContent', modalContent);
+    this.setState({
+      open: true,
+      m,
+    });
+  };
+
+  handleClose = () => {
+    this.setState({
+      open: false,
+    });
+  };
+
+  handleDeleteM = _id => {
+    this.props.removeMessageMutation({
+      variables: {
+        _id: _id,
+      },
+      optimisticResponse: {
+        __typename: 'Mutation',
+        removeMessage: {
+          __typename: 'MessageResponse',
+          ok: true,
+          error: null,
+          message: {
+            __typename: 'Message',
+            _id: _id,
+            userId: 'faked id',
+            content: '我是一个粉刷匠',
+            createdAt: +new Date(),
+            votes: [],
+            owner: 'fsf',
+            avatarUrl: localStorage.getItem('avatarUrl'),
+          },
+        },
+      },
+      update: (proxy, { data: { removeMessage } }) => {
+        console.log('proxy', proxy);
+
+        const readData = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
+
+        console.log('removeMessage', removeMessage);
+        const idx = readData.allMessages.findIndex(m => m._id === _id);
+
+        readData.allMessages.splice(idx, 1);
+
+        // console.log('readData', readData);
+
+        proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data: readData });
+      },
+      refetchQueries: [
+        {
+          query: gql`
+            query userQuery($id: String) {
+              user(id: $id) {
+                _id
+                name
+                email
+                token
+                num
+                followers {
+                  _id
+                }
+                followings {
+                  _id
+                }
+                hisMessages {
+                  _id
+                }
+                messageCount
+                avatarUrl
+              }
+            }
+          `,
+          variables: { id: localStorage.getItem('userId') },
+        },
+      ],
+    });
+  };
+
   render() {
     if (this.props.allMessageQuery.loading) {
       return <div>loading</div>;
@@ -179,15 +266,32 @@ class MessageContainer extends Component {
       console.log('this.props.allMessageQuery', this.props.allMessageQuery);
 
       const { allMessages } = this.props.allMessageQuery;
+      const open = this.state.open;
       return [
         <Item.Group divided key="item">
           {allMessages.map(m => {
-            return <MessageItem m={m} key={m._id} handleVote={this.handleVote} />;
+            return (
+              <MessageItem
+                m={m}
+                key={m._id}
+                handleVote={this.handleVote}
+                handleRtClick={this.handleRtClick}
+                handleDeleteM={this.handleDeleteM}
+              />
+            );
           })}
         </Item.Group>,
         <Button onClick={this.handleLoadMore} key="button">
           更多
         </Button>,
+        open && (
+          <MessageModal
+            key="modal"
+            open={this.state.open}
+            handleClose={this.handleClose}
+            m={this.state.m}
+          />
+        ),
       ];
     }
   }
@@ -204,6 +308,7 @@ export const QUERY_ALL_MESSAGES = gql`
       votes {
         userId
       }
+      avatarUrl
     }
   }
 `;
@@ -263,6 +368,7 @@ const MUTATE_CREATE_VOTE = gql`
       votes {
         userId
       }
+      avatarUrl
     }
   }
 `;
@@ -277,11 +383,38 @@ const MUTATE_REMOVE_VOTE = gql`
       votes {
         userId
       }
+      avatarUrl
+    }
+  }
+`;
+
+const MUTATE_DELETE_MESSAGE = gql`
+  mutation removeMessage($_id: String!) {
+    removeMessage(_id: $_id) {
+      ok
+      error
+      message {
+        _id
+        content
+        createdAt
+        userId
+        owner
+        votes {
+          userId
+        }
+        avatarUrl
+      }
     }
   }
 `;
 
 const withCreateVoteMutation = graphql(MUTATE_CREATE_VOTE, { name: 'createVoteMutation' });
 const withRemoveVoteMutation = graphql(MUTATE_REMOVE_VOTE, { name: 'removeVoteMutation' });
+const withRomoveMessageMutation = graphql(MUTATE_DELETE_MESSAGE, { name: 'removeMessageMutation' });
 
-export default compose(withData, withRemoveVoteMutation, withCreateVoteMutation)(MessageContainer);
+export default compose(
+  withData,
+  withRemoveVoteMutation,
+  withCreateVoteMutation,
+  withRomoveMessageMutation
+)(MessageContainer);
