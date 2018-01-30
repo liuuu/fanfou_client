@@ -25,3 +25,47 @@
 .delete-label {
   background-color: rgba(red, green, blue, 0) !important;
 }
+
+.user-card {
+  width: 220px;
+}
+
+@media screen and (max-width: 856px) {
+  .user-card {
+    display: none;
+  }
+}
+
+.delete-icon:hover {
+  color: rgb(0, 110, 255);
+}
+
+div.image.item-image {
+  width: 48px !important;
+}
+
+.field.form-button {
+  text-align: right;
+}
+
+@media only screen and (max-width: 767px) {
+  .message-container.ui.items:not(.unstackable) > .item > .image,
+  .message-container.ui.items:not(.unstackable) > .item > .image > img {
+    width: 48px !important;
+    padding: 0 0 0;
+  }
+  .message-container.ui.items:not(.unstackable) > .item {
+    display: flex;
+    flex-direction: row !important;
+  }
+  .message-container.ui.items:not(.unstackable) > .item > .image {
+    margin-right: 0.7rem;
+  }
+  .message-container.ui.items:not(.unstackable) > .item {
+    padding-top: 0.7rem;
+  }
+
+  .message-container.ui.items:not(.unstackable) > .item > .image + .content {
+    padding: 0;
+  }
+}

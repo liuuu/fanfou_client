@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Item, Label, Container, Menu, Button } from 'semantic-ui-react';
+import { Item, Label, Icon, Popup, Image, Container } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import TimeAgo from 'react-timeago';
 import gql from 'graphql-tag';
 import { graphql, compose } from 'react-apollo';
+import Navbar from '../components/Navbar';
 
 import ava from '../jenny.jpg';
 
@@ -93,41 +94,51 @@ class DisplayMessage extends Component {
 
   render() {
     if (this.props.queryMessage.loading) {
-      return <div>loading</div>;
+      return <div className="all-message">loading</div>;
     }
 
     console.log(this.props.queryMessage);
 
     const m = this.props.queryMessage.message;
     console.log('m', m);
+    const userId = localStorage.getItem('userId');
+    console.log('useId', userId);
+    const isVoted = m.votes.findIndex(v => v.userId === userId) > -1;
+    const isOwner = m.userId === userId;
 
     return (
-      <Container>
-        <Menu pointing secondary size="large">
-          <Menu.Item>
-            <Link to="/">Home</Link>
-          </Menu.Item>
-          <Menu.Item>
-            <Link to="/work">Work</Link>
-          </Menu.Item>
-          <Menu.Item>
-            <Link to="/work">Compony</Link>
-          </Menu.Item>
-          <Menu.Item>
-            <Link to="/work">Career</Link>
-          </Menu.Item>
-          <Menu.Item position="right">
-            <Button>Log in</Button>
-            <Button style={{ marginLeft: '0.5em' }}>Sign Up</Button>
-          </Menu.Item>
-        </Menu>
-        <div style={{ maxWidth: '960px', margin: '0 auto', textAlign: 'left' }}>
-          <MessageItem m={m} handleVote={this.handleVote} />
-        </div>
-      </Container>
+      <div className="all-message">
+        <Container>
+          <Navbar />
+          <div style={messageStyle}>
+            <Item key={m._id}>
+              <Item.Image src={m.avatarUrl} className="item-image" size="mini" />
+
+              <Item.Content>
+                <Item.Header>
+                  <Link to={`/user/${m.userId}`}>@{m.owner}</Link>
+                </Item.Header>
+                <Item.Meta>
+                  <Link to={`/message/${m._id}`}>
+                    <TimeAgo date={new Date(m.createdAt).toUTCString()} live={false} />
+                  </Link>
+                </Item.Meta>
+                <Item.Description>{m.content}</Item.Description>
+              </Item.Content>
+            </Item>
+          </div>
+        </Container>
+      </div>
     );
   }
 }
+
+const messageStyle = {
+  maxWidth: '768px',
+  margin: '0 auto',
+  textAlign: 'left',
+  borderRadius: '1rem',
+};
 
 const QUERY_SINGLE_MESSAGE = gql`
   query queryMessage($_id: String!) {
@@ -140,6 +151,7 @@ const QUERY_SINGLE_MESSAGE = gql`
       votes {
         userId
       }
+      avatarUrl
     }
   }
 `;
@@ -155,6 +167,7 @@ const MUTATE_CREATE_VOTE = gql`
       votes {
         userId
       }
+      avatarUrl
     }
   }
 `;
@@ -169,6 +182,7 @@ const MUTATE_REMOVE_VOTE = gql`
       votes {
         userId
       }
+      avatarUrl
     }
   }
 `;

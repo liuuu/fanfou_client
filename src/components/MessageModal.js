@@ -51,37 +51,36 @@ class MessageModal extends Component {
   };
   render() {
     console.log('this.props', this.props);
+    console.log('openiiiiiiiiiiiiiii');
 
     const { open, m } = this.props;
 
     // return 'sdf';
     return (
-      <div>
-        <Modal size="small" open={open} onClose={this.props.handleClose}>
-          <Modal.Header>转发微博</Modal.Header>
-          <Modal.Content>
-            <Item.Content>
-              <Form>
-                <TextArea
-                  autoHeight
-                  value={this.state.value}
-                  onChange={this.handleChange}
-                  placeholder="Try adding multiple lines"
-                />
-              </Form>
-            </Item.Content>
-          </Modal.Content>
-          <Modal.Actions>
-            <Button
-              positive
-              icon="checkmark"
-              labelPosition="right"
-              content="转发"
-              onClick={this.handleSubmit}
-            />
-          </Modal.Actions>
-        </Modal>,
-      </div>
+      <Modal size="small" open={open} onClose={this.props.handleClose}>
+        <Modal.Header>转发微博</Modal.Header>
+        <Modal.Content>
+          <Item.Content>
+            <Form>
+              <TextArea
+                autoHeight
+                value={this.state.value}
+                onChange={this.handleChange}
+                placeholder="Try adding multiple lines"
+              />
+            </Form>
+          </Item.Content>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button
+            positive
+            icon="checkmark"
+            labelPosition="right"
+            content="转发"
+            onClick={this.handleSubmit}
+          />
+        </Modal.Actions>
+      </Modal>
     );
   }
 }

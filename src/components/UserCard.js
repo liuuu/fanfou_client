@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { Card, Image, Button, Divider } from 'semantic-ui-react';
+import { Card, Image, Button, Divider, Icon, Label } from 'semantic-ui-react';
 import ava from '../jenny.jpg';
+import { withRouter, Link } from 'react-router-dom';
 
 import gql from 'graphql-tag';
 import { graphql, compose } from 'react-apollo';
+import { enhanceErrorWithDocument } from 'apollo-cache-inmemory';
 
 class UserCard extends Component {
   render() {
@@ -12,8 +14,10 @@ class UserCard extends Component {
     }
 
     const user = this.props.queryUser.user;
+    console.log('user-----', user);
+
     return (
-      <div>
+      <div className="user-card">
         <Card>
           <Card.Content>
             <Image size="tiny" src={user.avatarUrl} />
@@ -33,10 +37,23 @@ class UserCard extends Component {
                 <div>{user.followings.length}</div>
               </Button>
               <Button compact>
-                <div>微博:</div>
-                <div>{user.messageCount}</div>
+                <Link to={`/user/${user._id}`}>
+                  <div>微博:</div>
+                  <div>{user.messageCount}</div>
+                </Link>
               </Button>
             </Button.Group>
+            <Divider horizontal />
+            <Button as="div" labelPosition="right" basic>
+              <Button basic>
+                <Icon name="heart" color="yellow" />
+                喜欢
+              </Button>
+
+              <Label as="div" basic pointing="left">
+                {user.likedMessagesCount}
+              </Label>
+            </Button>
           </Card.Content>
         </Card>
       </div>
@@ -63,18 +80,21 @@ const QUERY_USER = gql`
       }
       messageCount
       avatarUrl
+      likedMessagesCount
     }
   }
 `;
 
-export default graphql(QUERY_USER, {
-  name: 'queryUser',
-  options: props => {
-    const userId = (props.match && props.match.params.userId) || localStorage.getItem('userId');
-    return {
-      variables: {
-        id: userId,
-      },
-    };
-  },
-})(UserCard);
+export default withRouter(
+  graphql(QUERY_USER, {
+    name: 'queryUser',
+    options: props => {
+      const userId = (props.match && props.match.params.userId) || localStorage.getItem('userId');
+      return {
+        variables: {
+          id: userId,
+        },
+      };
+    },
+  })(UserCard)
+);

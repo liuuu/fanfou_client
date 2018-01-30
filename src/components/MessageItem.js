@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Item, Label, Icon, Popup } from 'semantic-ui-react';
+import { Item, Label, Icon, Popup, Image } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import TimeAgo from 'react-timeago';
 import ava from '../jenny.jpg';
@@ -15,14 +15,13 @@ class MessageItem extends Component {
 
     return (
       <Item key={m._id}>
-        <Item.Image size="mini" src={m.avatarUrl} />
+        <Item.Image src={m.avatarUrl} className="item-image" size="mini" />
 
         <Item.Content>
           <Item.Header>
             <Link to={`/user/${m.userId}`}>@{m.owner}</Link>
           </Item.Header>
           <Item.Meta>
-            {/* <span className="cinema">{m.createdAt}</span> */}
             <Link to={`/message/${m._id}`}>
               <TimeAgo date={new Date(m.createdAt).toUTCString()} live={false} />
             </Link>
@@ -32,35 +31,46 @@ class MessageItem extends Component {
           <Item.Extra>
             <Popup
               trigger={
-                <Label onClick={(e, data) => handleVote(e, data, isVoted, m)} basic size="mini">
+                <Label onClick={(e, data) => handleVote(e, data, isVoted, m)} size="tiny">
                   <Icon name="heart" color={isVoted ? 'red' : 'grey'} />
                   {m.votes.length}
                 </Label>
               }
               size="mini"
-              content={isVoted ? '取消' : '点赞'}
+              content={isVoted ? '取消' : '喜欢'}
               position="top center"
               inverted
             />
-            <Label onClick={(e, data) => handleVote(e, data, isVoted, m)} size="mini">
+            <Popup
+              trigger={
+                <Label
+                  onClick={(e, data) => handleRtClick(e, data, m)}
+                  size="tiny"
+                  className="test"
+                >
+                  <Icon name="retweet" />
+                </Label>
+              }
+              size="mini"
+              content={'转发'}
+              position="top center"
+              inverted
+            />
+            {/* <Label onClick={(e, data) => handleVote(e, data, isVoted, m)} size="mini">
               <Icon name="heart" color={isVoted ? 'red' : 'grey'} />
               {m.votes.length}
-            </Label>
-            <Label>
+            </Label> */}
+            {/* <Label>
               <Icon name="reply" />
               15
             </Label>
             <Label>
               <Icon name="mail outline" />
-            </Label>
+            </Label> */}
 
-            <Label basic className="test" onClick={(e, data) => handleRtClick(m)}>
-              <Icon name="retweet" />
-              15
-            </Label>
             {isOwner && (
-              <span onClick={() => handleDeleteM(m._id)}>
-                <Icon name="delete" fitted color="blue" />
+              <span onClick={() => handleDeleteM(m._id)} className="delete-icon">
+                <Icon name="delete" fitted />
               </span>
             )}
           </Item.Extra>
