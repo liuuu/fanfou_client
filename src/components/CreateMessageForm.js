@@ -31,8 +31,7 @@ class CreateMessageForm extends Component {
 
     const { value } = this.state;
 
-    // not work cause the readQuery only require the root query as the skip:0 intererting
-    const num = parseInt(localStorage.getItem('num'), 10) || 0;
+    // not work cause the readQuery only require the `root` query as the skip:0 intererting
 
     const result = this.props.createMessageMutation({
       variables: {
@@ -60,15 +59,9 @@ class CreateMessageForm extends Component {
         console.log('proxy', proxy);
 
         const readData = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
-        // {
-        //   allMessage:[]
-        // }
 
         console.log('readData', readData);
-        console.log('readData.length', readData.allMessages.length);
         console.log('readData.allMessages', readData.allMessages);
-        console.log('readData.allMessages', readData.allMessages[0]);
-
         console.log('createMessage', createMessage);
 
         readData.allMessages.unshift(createMessage.message);

@@ -57,6 +57,7 @@ class NotificationBar extends Component {
 
         console.log(message);
 
+        this.props.saveCounts(this.state.content + 1);
         this.setState({
           open: true,
           content: this.state.content + 1,
@@ -75,9 +76,6 @@ class NotificationBar extends Component {
 
   handleClick = () => {
     const cache = this.props.client.cache;
-
-    console.log('cache', cache);
-    console.log('this.props.client', this.props.client);
 
     /*
     const data = cache.readQuery({
@@ -111,6 +109,8 @@ class NotificationBar extends Component {
       open: false,
     });
     */
+    this.props.saveCounts(0);
+
     const data = this.props.client.readQuery({
       query: QUERY_ALL_MESSAGES,
       variables: { skip: 0 },

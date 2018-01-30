@@ -30,6 +30,7 @@ const paragraph = 'lorem sjdklf sadljkf';
 // `;
 
 class MessageContainer extends Component {
+  num = 0;
   state = {
     open: false,
   };
@@ -75,9 +76,11 @@ class MessageContainer extends Component {
   // };
 
   handleLoadMore = () => {
-    const num = this.props.allMessageQuery.allMessages.length;
-    console.log('num', num);
-    localStorage.setItem('num', num);
+    // 因为之前的的
+
+    const num = this.props.allMessageQuery.allMessages.length + this.num;
+    // console.log('num', num);
+    // localStorage.setItem('num', num);
 
     this.props.allMessageQuery.fetchMore({
       variables: {
@@ -252,6 +255,10 @@ class MessageContainer extends Component {
     });
   };
 
+  saveCounts = num => {
+    this.num = num;
+  };
+
   render() {
     if (this.props.allMessageQuery.loading) {
       return <div>loading</div>;
@@ -265,7 +272,12 @@ class MessageContainer extends Component {
       const { allMessages } = this.props.allMessageQuery;
       const open = this.state.open;
       return [
-        <NotificationBar key="noti" allMessageQuery={this.props.allMessageQuery} />,
+        <NotificationBar
+          key="noti"
+          allMessageQuery={this.props.allMessageQuery}
+          ref={node => (this.notibar = node)}
+          saveCounts={this.saveCounts}
+        />,
         <Item.Group divided key="item">
           {allMessages.map(m => {
             return (
