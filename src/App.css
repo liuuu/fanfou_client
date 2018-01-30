@@ -49,23 +49,27 @@ div.image.item-image {
 }
 
 @media only screen and (max-width: 767px) {
-  .message-container.ui.items:not(.unstackable) > .item > .image,
-  .message-container.ui.items:not(.unstackable) > .item > .image > img {
+  .ui.items:not(.unstackable) > .item > .image,
+  .ui.items:not(.unstackable) > .item > .image > img {
     width: 48px !important;
     padding: 0 0 0;
   }
-  .message-container.ui.items:not(.unstackable) > .item {
+  .ui.items:not(.unstackable) > .item {
     display: flex;
     flex-direction: row !important;
   }
-  .message-container.ui.items:not(.unstackable) > .item > .image {
+  .ui.items:not(.unstackable) > .item > .image {
     margin-right: 0.7rem;
   }
-  .message-container.ui.items:not(.unstackable) > .item {
+  .ui.items:not(.unstackable) > .item {
     padding-top: 0.7rem;
   }
 
-  .message-container.ui.items:not(.unstackable) > .item > .image + .content {
+  .ui.items:not(.unstackable) > .item > .image + .content {
     padding: 0;
   }
+}
+
+.noti-button {
+  margin-top: 0.1rem;
 }

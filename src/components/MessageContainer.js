@@ -13,66 +13,66 @@ import Divider from 'semantic-ui-react/dist/commonjs/elements/Divider/Divider';
 
 const paragraph = 'lorem sjdklf sadljkf';
 
-const newMessageSubscription = gql`
-  subscription($userId: String!) {
-    newMessageAdded(userId: $userId) {
-      content
-      userId
-      createdAt
-      _id
-      votes {
-        userId
-      }
-      owner
-      avatarUrl
-    }
-  }
-`;
+// const newMessageSubscription = gql`
+//   subscription($userId: String!) {
+//     newMessageAdded(userId: $userId) {
+//       content
+//       userId
+//       createdAt
+//       _id
+//       votes {
+//         userId
+//       }
+//       owner
+//       avatarUrl
+//     }
+//   }
+// `;
 
 class MessageContainer extends Component {
   state = {
     open: false,
   };
-  componentWillMount() {
-    const userId = localStorage.getItem('userId');
-    console.log('userId from localStorage', userId);
-    console.log('this.props in will Mount', this.props);
+  // componentWillMount() {
+  //   const userId = localStorage.getItem('userId');
+  //   console.log('userId from localStorage', userId);
+  //   console.log('this.props in will Mount', this.props);
 
-    this.unsubscribe = this.subscribe(userId);
-  }
+  //   this.unsubscribe = this.subscribe(userId);
+  // }
 
-  subscribe = userId => {
-    this.props.allMessageQuery.subscribeToMore({
-      document: newMessageSubscription,
-      variables: { userId },
-      updateQuery: (prev, { subscriptionData }) => {
-        console.log('prev', prev);
-        console.log('subscriptionData', subscriptionData);
+  // subscribe = userId => {
+  //   this.props.allMessageQuery.subscribeToMore({
+  //     document: newMessageSubscription,
+  //     variables: { userId },
+  //     updateQuery: (prev, { subscriptionData }) => {
+  //       console.log('prev', prev);
+  //       console.log('subscriptionData', subscriptionData);
 
-        // console.log('subscriptionData', subscriptionData);
+  //       // console.log('subscriptionData', subscriptionData);
 
-        if (!subscriptionData) {
-          return prev;
-        }
+  //       if (!subscriptionData) {
+  //         return prev;
+  //       }
 
-        const message = subscriptionData.data.newMessageAdded;
-        // console.log('message.userId', message.userId);
-        // const localId = localStorage.getItem('userId');
-        // console.log(localId === message.userId);
+  //       const message = subscriptionData.data.newMessageAdded;
+  //       // console.log('message.userId', message.userId);
+  //       // const localId = localStorage.getItem('userId');
+  //       // console.log(localId === message.userId);
 
-        // if (message.userId === localStorage.getItem('userId')) {
-        //   return prev;
-        // }
+  //       // if (message.userId === localStorage.getItem('userId')) {
+  //       //   return prev;
+  //       // }
 
-        // return prev;
+  //       // return prev;
 
-        return {
-          ...prev,
-          allMessages: [message, ...prev.allMessages],
-        };
-      },
-    });
-  };
+  //       return {
+  //         ...prev,
+  //         allMessages: [message, ...prev.allMessages],
+  //       };
+  //     },
+  //   });
+  // };
 
   handleLoadMore = () => {
     const num = this.props.allMessageQuery.allMessages.length;
@@ -265,8 +265,7 @@ class MessageContainer extends Component {
       const { allMessages } = this.props.allMessageQuery;
       const open = this.state.open;
       return [
-        <NotificationBar key="noti" />,
-
+        <NotificationBar key="noti" allMessageQuery={this.props.allMessageQuery} />,
         <Item.Group divided key="item">
           {allMessages.map(m => {
             return (
@@ -311,20 +310,6 @@ export const QUERY_ALL_MESSAGES = gql`
     }
   }
 `;
-
-const withData = graphql(QUERY_ALL_MESSAGES, {
-  name: 'allMessageQuery',
-  options: props => {
-    console.log('props.match', props.match);
-
-    return {
-      variables: {
-        skip: 0,
-        userId: props.match && props.match.params.userId,
-      },
-    };
-  },
-});
 
 const MUTATE_CREATE_VOTE = gql`
   mutation createVote($_id: String!) {
@@ -405,6 +390,20 @@ const refetchQueries = [
     variables: { id: localStorage.getItem('userId') },
   },
 ];
+
+const withData = graphql(QUERY_ALL_MESSAGES, {
+  name: 'allMessageQuery',
+  options: props => {
+    // console.log('props.match', props.match);
+
+    return {
+      variables: {
+        skip: 0,
+        userId: props.match && props.match.params.userId,
+      },
+    };
+  },
+});
 
 const withCreateVoteMutation = graphql(MUTATE_CREATE_VOTE, { name: 'createVoteMutation' });
 const withRemoveVoteMutation = graphql(MUTATE_REMOVE_VOTE, { name: 'removeVoteMutation' });

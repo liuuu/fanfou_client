@@ -4,6 +4,7 @@ import Home from './routes/Home';
 import Register from './routes/Register';
 import Work from './routes/Work';
 import DisplayMessage from './routes/DisplayMessage';
+import DisplayUser from './routes/DisplayUser';
 import './App.css';
 
 class App extends Component {
@@ -15,6 +16,7 @@ class App extends Component {
           <Route path="/register" exact component={Register} />
           <Route path="/work" exact component={Work} />
           <Route path="/message/:messageId" exact component={DisplayMessage} />
+          <Route path="/user/:userId" exact component={DisplayUser} />
         </Switch>
       </BrowserRouter>
     );
