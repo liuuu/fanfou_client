@@ -3,11 +3,13 @@ import { Item, Label, Button } from 'semantic-ui-react';
 import { graphql, withApollo, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 import TimeAgo from 'react-timeago';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 import MessageItem from './MessageItem';
+import NotificationBar from './NotificationBar';
 
 import ava from '../jenny.jpg';
 import MessageModal from '../components/MessageModal';
+import Divider from 'semantic-ui-react/dist/commonjs/elements/Divider/Divider';
 
 const paragraph = 'lorem sjdklf sadljkf';
 
@@ -26,6 +28,7 @@ const newMessageSubscription = gql`
     }
   }
 `;
+
 class MessageContainer extends Component {
   state = {
     open: false,
@@ -109,7 +112,7 @@ class MessageContainer extends Component {
           createVote: {
             __typename: 'Message',
             content: m.content,
-            userId: userId,
+            userId: m.userId,
             createdAt: m.createdAt,
             _id: m._id,
             owner: m.owner,
@@ -138,6 +141,7 @@ class MessageContainer extends Component {
 
           proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data });
         },
+        refetchQueries: refetchQueries,
       });
     } else {
       // alresdy voted and find to remove
@@ -154,7 +158,7 @@ class MessageContainer extends Component {
           removeVote: {
             __typename: 'Message',
             content: m.content,
-            userId: userId,
+            userId: m.userId,
             createdAt: m.createdAt,
             _id: m._id,
             owner: m.owner,
@@ -173,19 +177,35 @@ class MessageContainer extends Component {
 
           proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data });
         },
+        refetchQueries: refetchQueries,
       });
     }
   };
 
-  handleRtClick = m => {
+  handleRtClick = (e, data, m) => {
     // console.log('modalContent', modalContent);
-    this.setState({
+    console.log('this', this);
+
+    console.log('this.state.open', this.state.open);
+
+    this.setState(prevState => ({
       open: true,
       m,
-    });
+    }));
   };
 
-  handleClose = () => {
+  handleClose = e => {
+    console.log('e', e);
+    // e.target.className retweet icon
+    // e.target.className ui tiny label test
+    // console.log('e.target.className', e.target.className);
+
+    if (e && (e.target.className.includes('retweet') || e.target.className.includes('label'))) {
+      return;
+    }
+
+    console.log('closinginging');
+
     this.setState({
       open: false,
     });
@@ -228,33 +248,7 @@ class MessageContainer extends Component {
 
         proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data: readData });
       },
-      refetchQueries: [
-        {
-          query: gql`
-            query userQuery($id: String) {
-              user(id: $id) {
-                _id
-                name
-                email
-                token
-                num
-                followers {
-                  _id
-                }
-                followings {
-                  _id
-                }
-                hisMessages {
-                  _id
-                }
-                messageCount
-                avatarUrl
-              }
-            }
-          `,
-          variables: { id: localStorage.getItem('userId') },
-        },
-      ],
+      refetchQueries: refetchQueries,
     });
   };
 
@@ -262,12 +256,17 @@ class MessageContainer extends Component {
     if (this.props.allMessageQuery.loading) {
       return <div>loading</div>;
     } else {
+      console.log('render-------------');
+
       console.log('this.props.allMessageQuery.allMessages', this.props.allMessageQuery.allMessages);
       console.log('this.props.allMessageQuery', this.props.allMessageQuery);
+      console.log('this.state.open', this.state.open);
 
       const { allMessages } = this.props.allMessageQuery;
       const open = this.state.open;
       return [
+        <NotificationBar key="noti" />,
+
         <Item.Group divided key="item">
           {allMessages.map(m => {
             return (
@@ -298,8 +297,8 @@ class MessageContainer extends Component {
 }
 
 export const QUERY_ALL_MESSAGES = gql`
-  query allMessages($skip: Int!) {
-    allMessages(skip: $skip) {
+  query allMessages($skip: Int!, $userId: String) {
+    allMessages(skip: $skip, userId: $userId) {
       content
       userId
       createdAt
@@ -313,45 +312,15 @@ export const QUERY_ALL_MESSAGES = gql`
   }
 `;
 
-//  _id: String!
-//   content: String!
-//   createdAt: String!
-//   userId: String!
-//   owner: String!
-//   votes:[Vote!]
-
-// export const QUERY_ALL_MESSAGES = gql`
-//   query allMessages {
-//     allMessages {
-//       content
-//       userId
-//       createdAt
-//       _id
-//     }
-//   }
-// `;
-
-{
-  /* <Item>
-  <Item.Image size="mini" src={ava} />
-
-  <Item.Content>
-    <Item.Header as="a">Watchmen</Item.Header>
-    <Item.Meta>
-      <span className="cinema">IFC</span>
-    </Item.Meta>
-    <Item.Description>{paragraph}</Item.Description>
-    <Item.Extra />
-  </Item.Content>
-</Item>; */
-}
-
 const withData = graphql(QUERY_ALL_MESSAGES, {
   name: 'allMessageQuery',
   options: props => {
+    console.log('props.match', props.match);
+
     return {
       variables: {
         skip: 0,
+        userId: props.match && props.match.params.userId,
       },
     };
   },
@@ -408,13 +377,41 @@ const MUTATE_DELETE_MESSAGE = gql`
   }
 `;
 
+const refetchQueries = [
+  {
+    query: gql`
+      query userQuery($id: String) {
+        user(id: $id) {
+          _id
+          name
+          email
+          token
+          num
+          followers {
+            _id
+          }
+          followings {
+            _id
+          }
+          hisMessages {
+            _id
+          }
+          messageCount
+          avatarUrl
+          likedMessagesCount
+        }
+      }
+    `,
+    variables: { id: localStorage.getItem('userId') },
+  },
+];
+
 const withCreateVoteMutation = graphql(MUTATE_CREATE_VOTE, { name: 'createVoteMutation' });
 const withRemoveVoteMutation = graphql(MUTATE_REMOVE_VOTE, { name: 'removeVoteMutation' });
 const withRomoveMessageMutation = graphql(MUTATE_DELETE_MESSAGE, { name: 'removeMessageMutation' });
 
-export default compose(
-  withData,
-  withRemoveVoteMutation,
-  withCreateVoteMutation,
-  withRomoveMessageMutation
-)(MessageContainer);
+export default withRouter(
+  compose(withData, withRemoveVoteMutation, withCreateVoteMutation, withRomoveMessageMutation)(
+    MessageContainer
+  )
+);
