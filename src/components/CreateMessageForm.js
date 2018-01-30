@@ -3,21 +3,22 @@ import { Form, TextArea, Button, Progress } from 'semantic-ui-react';
 import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
 import { QUERY_ALL_MESSAGES } from './MessageContainer';
+import Divider from 'semantic-ui-react/dist/commonjs/elements/Divider/Divider';
 
 class CreateMessageForm extends Component {
   state = { value: '', percent: 0 };
 
   handleChange = e => {
-    if (e.target.value.length > 20) {
+    if (e.target.value.length > 160) {
       this.setState({
-        value: e.target.value.slice(0, 20),
-        percent: e.target.value.trim().length * 100 / 20,
+        value: e.target.value.slice(0, 160),
+        percent: e.target.value.trim().length * 100 / 160,
       });
       return;
     }
     this.setState({
       value: e.target.value.trim(),
-      percent: e.target.value.trim().length * 100 / 20,
+      percent: e.target.value.trim().length * 100 / 160,
     });
   };
 
@@ -76,8 +77,8 @@ class CreateMessageForm extends Component {
 
         proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data: readData });
       },
+      refetchQueries: refetchQueries,
     });
-    // console.log('result', result);
   };
   render() {
     console.log('this.state.percent', this.state.percent);
@@ -94,8 +95,11 @@ class CreateMessageForm extends Component {
           />
         </div>
         <Progress percent={this.state.percent} attached="bottom" />
+        <Divider clearing fitted hidden />
         <div>
-          <Form.Field control={Button}>Submit</Form.Field>
+          <Form.Field control={Button} className="form-button">
+            发送
+          </Form.Field>
         </div>
       </Form>
     );
@@ -121,6 +125,35 @@ const CREATE_MESSAGE = gql`
     }
   }
 `;
+
+const refetchQueries = [
+  {
+    query: gql`
+      query userQuery($id: String) {
+        user(id: $id) {
+          _id
+          name
+          email
+          token
+          num
+          followers {
+            _id
+          }
+          followings {
+            _id
+          }
+          hisMessages {
+            _id
+          }
+          messageCount
+          avatarUrl
+          likedMessagesCount
+        }
+      }
+    `,
+    variables: { id: localStorage.getItem('userId') },
+  },
+];
 
 export default withApollo(
   graphql(CREATE_MESSAGE, { name: 'createMessageMutation' })(CreateMessageForm)
