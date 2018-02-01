@@ -108,18 +108,19 @@ class NotificationBar extends Component {
       open: false,
     });
     */
+
     this.props.saveCounts(0);
 
     const data = this.props.client.readQuery({
       query: QUERY_ALL_MESSAGES,
-      variables: { skip: 0 },
+      variables: { skip: 0, userId: null },
     });
     console.log('data', data);
 
     data.allMessages.unshift(...this.state.notiMessageArr);
     this.props.client.writeQuery({
       query: QUERY_ALL_MESSAGES,
-      variables: { skip: 0 },
+      variables: { skip: 0, userId: null },
       data: data,
     });
     this.setState({
@@ -127,13 +128,17 @@ class NotificationBar extends Component {
       open: false,
       notiMessageArr: [],
     });
+
+    // this.props.client.refetchQuery({
+
+    // })
   };
 
   render() {
     console.log('this.state.', this.state.notiMessageArr);
 
     return (
-      <div style={{ background: 'blue' }} className="noti-button">
+      <div style={{}} className="noti-button">
         {this.state.open && (
           <Button onClick={this.handleClick} fluid>{`有${this.state.content}条新信息`}</Button>
         )}

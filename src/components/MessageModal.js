@@ -9,6 +9,7 @@ import gql from 'graphql-tag';
 class MessageModal extends Component {
   state = {
     value: `@${this.props.m.owner}  ${this.props.m.content}`,
+    loading: false,
   };
 
   handleChange = e => {
@@ -17,21 +18,23 @@ class MessageModal extends Component {
     });
   };
 
-  handleSubmit = e => {
+  handleSubmit = async e => {
     // optimistic and fetchmore
-    this.props.handleClose();
 
     const { value } = this.state;
+    this.setState({
+      loading: true,
+    });
 
-    const result = this.props.createMessageMutation({
+    const result = await this.props.createMessageMutation({
       variables: {
         content: value,
       },
       refetchQueries: [
         {
           query: gql`
-            query allMessages($skip: Int!) {
-              allMessages(skip: $skip) {
+            query allMessages($skip: Int!, $userId: String) {
+              allMessages(skip: $skip, userId: $userId) {
                 content
                 userId
                 createdAt
@@ -44,10 +47,14 @@ class MessageModal extends Component {
               }
             }
           `,
-          variables: { skip: 0 },
+          variables: { skip: 0, userId: null },
         },
       ],
     });
+    this.setState({
+      loading: false,
+    });
+    this.props.handleClose();
   };
   render() {
     console.log('this.props', this.props);
@@ -78,6 +85,7 @@ class MessageModal extends Component {
             labelPosition="right"
             content="转发"
             onClick={this.handleSubmit}
+            loading={this.state.loading}
           />
         </Modal.Actions>
       </Modal>

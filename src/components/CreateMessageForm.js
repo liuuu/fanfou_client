@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Form, TextArea, Button, Progress } from 'semantic-ui-react';
 import { graphql, withApollo } from 'react-apollo';
 import gql from 'graphql-tag';
+import { withRouter } from 'react-router-dom';
 import { QUERY_ALL_MESSAGES } from './MessageContainer';
 import Divider from 'semantic-ui-react/dist/commonjs/elements/Divider/Divider';
 
@@ -25,6 +26,7 @@ class CreateMessageForm extends Component {
   handleSubmit = e => {
     // optimistic and fetchmore
     // console.log('this.props', this.props);
+    const userId = this.props.match.params.userId ? this.props.match.params.userId : null;
     const { value } = this.state;
     if (!this.state.value) {
       return;
@@ -57,7 +59,10 @@ class CreateMessageForm extends Component {
       update: (proxy, { data: { createMessage } }) => {
         console.log('proxy', proxy);
 
-        const readData = proxy.readQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 } });
+        const readData = proxy.readQuery({
+          query: QUERY_ALL_MESSAGES,
+          variables: { skip: 0, userId: userId },
+        });
 
         console.log('readData', readData);
         console.log('readData.allMessages', readData.allMessages);
@@ -66,8 +71,13 @@ class CreateMessageForm extends Component {
         readData.allMessages.unshift(createMessage.message);
 
         // console.log('readData', readData);
+        console.log('-----------------------');
 
-        proxy.writeQuery({ query: QUERY_ALL_MESSAGES, variables: { skip: 0 }, data: readData });
+        proxy.writeQuery({
+          query: QUERY_ALL_MESSAGES,
+          variables: { skip: 0, userId: userId },
+          data: readData,
+        });
       },
       refetchQueries: refetchQueries,
     });
@@ -147,6 +157,6 @@ const refetchQueries = [
   },
 ];
 
-export default withApollo(
-  graphql(CREATE_MESSAGE, { name: 'createMessageMutation' })(CreateMessageForm)
+export default withRouter(
+  withApollo(graphql(CREATE_MESSAGE, { name: 'createMessageMutation' })(CreateMessageForm))
 );

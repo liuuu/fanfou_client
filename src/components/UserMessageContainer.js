@@ -457,7 +457,6 @@ const withData = graphql(QUERY_ALL_MESSAGES, {
         skip: 0,
         userId: userId,
       },
-      fetchPolicy: 'network-only',
     };
   },
 });
