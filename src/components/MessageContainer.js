@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Item, Label, Button } from 'semantic-ui-react';
+import { Item, Label, Button, Divider, Loader, Segment } from 'semantic-ui-react';
 import { graphql, withApollo, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 import TimeAgo from 'react-timeago';
@@ -9,7 +9,7 @@ import NotificationBar from './NotificationBar';
 
 import ava from '../jenny.jpg';
 import MessageModal from '../components/MessageModal';
-import Divider from 'semantic-ui-react/dist/commonjs/elements/Divider/Divider';
+import CreateMessageForm from './CreateMessageForm';
 
 const paragraph = 'lorem sjdklf sadljkf';
 
@@ -30,9 +30,10 @@ const paragraph = 'lorem sjdklf sadljkf';
 // `;
 
 class MessageContainer extends Component {
-  num = 0;
+  notiCounts = 0;
   state = {
     open: false,
+    loadingMore: false,
   };
   // componentWillMount() {
   //   const userId = localStorage.getItem('userId');
@@ -75,14 +76,17 @@ class MessageContainer extends Component {
   //   });
   // };
 
-  handleLoadMore = () => {
+  handleLoadMore = async () => {
     // 因为之前的的
+    this.setState({
+      loadingMore: true,
+    });
 
-    const num = this.props.allMessageQuery.allMessages.length + this.num;
+    const num = this.props.allMessageQuery.allMessages.length + this.notiCounts;
     // console.log('num', num);
     // localStorage.setItem('num', num);
 
-    this.props.allMessageQuery.fetchMore({
+    await this.props.allMessageQuery.fetchMore({
       variables: {
         skip: num,
       },
@@ -98,6 +102,9 @@ class MessageContainer extends Component {
           allMessages: [...prev.allMessages, ...fetchMoreResult.allMessages],
         };
       },
+    });
+    this.setState({
+      loadingMore: false,
     });
   };
 
@@ -256,22 +263,32 @@ class MessageContainer extends Component {
   };
 
   saveCounts = num => {
-    this.num = num;
+    this.notiCounts = num;
   };
 
   render() {
     if (this.props.allMessageQuery.loading) {
-      return <div>loading</div>;
+      return (
+        <div>
+          <div>
+            {!(this.props.match && this.props.match.params.userId) && (
+              <CreateMessageForm key="create-form" />
+            )}
+          </div>
+          <div style={{ marginTop: '20rem' }}>
+            <Loader size="large" active as="div">
+              正在加载
+            </Loader>
+          </div>
+        </div>
+      );
     } else {
-      console.log('render-------------');
-
-      console.log('this.props.allMessageQuery.allMessages', this.props.allMessageQuery.allMessages);
-      console.log('this.props.allMessageQuery', this.props.allMessageQuery);
-      console.log('this.state.open', this.state.open);
-
       const { allMessages } = this.props.allMessageQuery;
       const open = this.state.open;
       return [
+        !(this.props.match && this.props.match.params.userId) && (
+          <CreateMessageForm key="create-form" />
+        ),
         <NotificationBar
           key="noti"
           allMessageQuery={this.props.allMessageQuery}
@@ -291,8 +308,8 @@ class MessageContainer extends Component {
             );
           })}
         </Item.Group>,
-        <Button onClick={this.handleLoadMore} key="button">
-          更多
+        <Button onClick={this.handleLoadMore} loading={this.state.loadingMore} key="button">
+          {this.state.loadingMore ? '正在加载' : '加载更多'}
         </Button>,
         open && (
           <MessageModal

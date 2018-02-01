@@ -9,8 +9,8 @@ import { enhanceErrorWithDocument } from 'apollo-cache-inmemory';
 
 class UserCard extends Component {
   render() {
-    if (this.props.queryUser.loading) {
-      return <div>loading</div>;
+    if (this.props.queryUser.loading || !this.props.queryUser.user) {
+      return null;
     }
 
     const user = this.props.queryUser.user;

@@ -27,7 +27,6 @@ class NotificationBar extends Component {
   };
   componentWillMount() {
     const userId = localStorage.getItem('userId');
-
     this.unsubscribe = this.subscribe(userId);
     this.props.client.watchQuery({
       query: QUERY_ALL_MESSAGES,

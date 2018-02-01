@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import TimeAgo from 'react-timeago';
 import gql from 'graphql-tag';
 import { graphql, compose } from 'react-apollo';
+import styled from 'styled-components';
 import Navbar from '../components/Navbar';
 
 import ava from '../jenny.jpg';
@@ -111,21 +112,23 @@ class DisplayMessage extends Component {
         <Container>
           <Navbar />
           <div style={messageStyle}>
-            <Item key={m._id}>
-              <Item.Image src={m.avatarUrl} className="item-image" size="mini" />
+            <ItemLeft>
+              <Image src={m.avatarUrl} size="tiny" />
+            </ItemLeft>
 
-              <Item.Content>
-                <Item.Header>
-                  <Link to={`/user/${m.userId}`}>@{m.owner}</Link>
-                </Item.Header>
-                <Item.Meta>
-                  <Link to={`/message/${m._id}`}>
-                    <TimeAgo date={new Date(m.createdAt).toUTCString()} live={false} />
-                  </Link>
-                </Item.Meta>
+            <ItemRight>
+              <Item.Header>
+                <Link to={`/user/${m.userId}`}>@{m.owner}</Link>
+              </Item.Header>
+              <Item.Meta>
+                <Link to={`/message/${m._id}`}>
+                  <TimeAgo date={new Date(m.createdAt).toUTCString()} live={false} />
+                </Link>
+              </Item.Meta>
+              <div style={{ paddingTop: '0.5rem' }}>
                 <Item.Description>{m.content}</Item.Description>
-              </Item.Content>
-            </Item>
+              </div>
+            </ItemRight>
           </div>
         </Container>
       </div>
@@ -133,11 +136,25 @@ class DisplayMessage extends Component {
   }
 }
 
+const ItemLeft = styled.div`
+  flex: 0 0 80px;
+  height: 80px;
+  margin-right: 1rem;
+`;
+
+const ItemRight = styled.div`
+  flex: 1;
+`;
+
 const messageStyle = {
+  background: '#acdae5',
+  padding: ' 1rem',
   maxWidth: '768px',
-  margin: '0 auto',
+  margin: '4rem auto',
   textAlign: 'left',
   borderRadius: '1rem',
+  // border: '1px solid red',
+  display: 'flex',
 };
 
 const QUERY_SINGLE_MESSAGE = gql`

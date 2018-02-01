@@ -10,7 +10,7 @@ class Navbar extends Component {
   render() {
     const isLogin = localStorage.getItem('userId');
     return (
-      <Menu pointing secondary size="large">
+      <Menu secondary size="large" as="div">
         <Menu.Item>
           <Link to="/">Home</Link>
         </Menu.Item>

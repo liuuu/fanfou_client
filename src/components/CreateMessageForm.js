@@ -24,12 +24,11 @@ class CreateMessageForm extends Component {
 
   handleSubmit = e => {
     // optimistic and fetchmore
-    console.log('this.props', this.props);
+    // console.log('this.props', this.props);
+    const { value } = this.state;
     if (!this.state.value) {
       return;
     }
-
-    const { value } = this.state;
 
     // not work cause the readQuery only require the `root` query as the skip:0 intererting
 
@@ -50,7 +49,7 @@ class CreateMessageForm extends Component {
             content: value,
             createdAt: +new Date(),
             votes: [],
-            owner: 'fsf',
+            owner: localStorage.getItem('name'),
             avatarUrl: localStorage.getItem('avatarUrl'),
           },
         },
@@ -74,7 +73,7 @@ class CreateMessageForm extends Component {
     });
   };
   render() {
-    console.log('this.state.percent', this.state.percent);
+    // console.log('this.state.percent', this.state.percent);
 
     return (
       <Form onSubmit={this.handleSubmit}>

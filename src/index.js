@@ -16,6 +16,7 @@ import { split } from 'apollo-link';
 import { getMainDefinition } from 'apollo-utilities';
 
 const endPoint = 'http://localhost:5555/graphql';
+// const endPoint = 'http://ec2-54-95-51-123.ap-northeast-1.compute.amazonaws.com/graphql';
 
 const tokenLink = setContext((req, { headers }) => {
   const xtoken = localStorage.getItem('xtoken');
@@ -51,6 +52,7 @@ const linkWithToken = tokenLink.concat(httpLink);
 //   cache: new InMemoryCache(),
 // });
 
+//ws://ec2-54-95-51-123.ap-northeast-1.compute.amazonaws.com/subscriptions
 const wsLink = new WebSocketLink({
   uri: 'ws://localhost:5555/subscriptions',
   options: {
@@ -60,8 +62,13 @@ const wsLink = new WebSocketLink({
       console.log('ws connention callback', error);
       return null;
     },
+    connectionParams: {
+      xtoken: localStorage.getItem('xtoken'),
+    },
   },
 });
+
+// console.log('wsLink', wsLink);
 
 const link = split(
   // split based on operation type
