@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { Item, Label, Icon, Popup, Image } from 'semantic-ui-react';
+import ReactDOM from 'react-dom';
+import { Item, Label, Icon, Popup, Image, Button } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import TimeAgo from 'react-timeago';
 import ava from '../jenny.jpg';
+import { warnOnceInDevelopment } from 'apollo-utilities';
 
 class MessageItem extends Component {
   render() {
@@ -69,9 +71,24 @@ class MessageItem extends Component {
             </Label> */}
 
             {isOwner && (
-              <span onClick={() => handleDeleteM(m._id)} className="delete-icon">
-                <Icon name="delete" fitted />
-              </span>
+              <Popup
+                trigger={
+                  <span className="delete-icon">
+                    <Icon name="delete" fitted />
+                  </span>
+                }
+                content={
+                  <Button size="mini" color="red" onClick={() => handleDeleteM(m._id)}>
+                    删除
+                  </Button>
+                }
+                hideOnScroll
+                size="mini"
+                on="click"
+                position="top center"
+                style={popupStyle}
+                inverted
+              />
             )}
           </Item.Extra>
         </Item.Content>
@@ -79,6 +96,20 @@ class MessageItem extends Component {
     );
   }
 }
+
+const popupStyle = {
+  opacity: 1,
+  padding: '0.35rem',
+};
+
+const buttonStyle = {
+  background: 'red',
+  border: 'none',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItem: 'center',
+  color: 'white',
+};
 
 const LLL = () => {
   return (
