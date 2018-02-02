@@ -6,6 +6,7 @@ import TimeAgo from 'react-timeago';
 import { Link, withRouter } from 'react-router-dom';
 import MessageItem from './MessageItem';
 import NotificationBar from './NotificationBar';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import ava from '../jenny.jpg';
 import MessageModal from '../components/MessageModal';
@@ -304,6 +305,8 @@ class MessageContainer extends Component {
   };
 
   render() {
+    console.log('rendering alls');
+
     if (this.props.allMessageQuery.loading) {
       return (
         <div>
@@ -332,6 +335,7 @@ class MessageContainer extends Component {
           ref={node => (this.notibar = node)}
           saveCounts={this.saveCounts}
         />,
+
         <Item.Group divided key="item">
           {allMessages.map(m => {
             return (
@@ -345,6 +349,7 @@ class MessageContainer extends Component {
             );
           })}
         </Item.Group>,
+
         <Button onClick={this.handleLoadMore} loading={this.state.loadingMore} key="button">
           {this.state.hasMore ? '加载更多' : '没有更多了'}
         </Button>,

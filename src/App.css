@@ -29,6 +29,7 @@
   width: 220px;
 }
 
+/* media query for userCard */
 @media screen and (max-width: 856px) {
   .user-card {
     display: none;
@@ -46,7 +47,7 @@ div.image.item-image {
 .field.form-button {
   text-align: right;
 }
-
+/* 
 @media only screen and (max-width: 767px) {
   .ui.items:not(.unstackable) > .item > .image,
   .ui.items:not(.unstackable) > .item > .image > img {
@@ -67,8 +68,9 @@ div.image.item-image {
   .ui.items:not(.unstackable) > .item > .image + .content {
     padding: 0;
   }
-}
+} */
 
+/* noti-button */
 .noti-button {
   margin-top: 0.1rem;
 }
@@ -108,4 +110,26 @@ div.login-form {
   position: fixed;
   left: 2rem;
   bottom: 2rem;
+}
+
+/* css transition */
+.example-enter {
+  opacity: 0.01;
+  background: red;
+}
+
+.example-enter.example-enter-active {
+  opacity: 1;
+  background: blue;
+  transition: opacity 500ms ease-in;
+  transition: background 2500ms ease-in;
+}
+
+.example-leave {
+  opacity: 1;
+}
+
+.example-leave.example-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
 }

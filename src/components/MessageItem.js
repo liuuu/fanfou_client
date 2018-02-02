@@ -4,7 +4,6 @@ import { Item, Label, Icon, Popup, Image, Button } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import TimeAgo from 'react-timeago';
 import ava from '../jenny.jpg';
-import { warnOnceInDevelopment } from 'apollo-utilities';
 
 class MessageItem extends Component {
   render() {
