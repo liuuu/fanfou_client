@@ -149,7 +149,7 @@ class MessageItem extends Component {
           <Item.Extra>
             <Popup
               trigger={
-                <Label onClick={(e, data) => this.handleVote(e, data, isVoted, m)} size="tiny">
+                <Label onClick={(e, data) => handleVote(e, data, isVoted, m)} size="tiny">
                   <Icon name="heart" color={isVoted ? 'red' : 'grey'} />
                   {m.votes.length}
                 </Label>
@@ -299,5 +299,5 @@ const MUTATE_REMOVE_VOTE = gql`
 const withCreateVoteMutation = graphql(MUTATE_CREATE_VOTE, { name: 'createVoteMutation' });
 
 const withRemoveVoteMutation = graphql(MUTATE_REMOVE_VOTE, { name: 'removeVoteMutation' });
-export default compose(withCreateVoteMutation, withRemoveVoteMutation)(withRouter(MessageItem));
-// export default MessageItem;
+// export default compose(withCreateVoteMutation, withRemoveVoteMutation)(withRouter(MessageItem));
+export default MessageItem;
