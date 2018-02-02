@@ -4,8 +4,125 @@ import { Item, Label, Icon, Popup, Image, Button } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
 import TimeAgo from 'react-timeago';
 import ava from '../jenny.jpg';
+import { QUERY_ALL_MESSAGES } from './MessageContainer';
+import { graphql, withApollo, compose } from 'react-apollo';
+import gql from 'graphql-tag';
+import { withRouter } from 'react-router-dom';
 
 class MessageItem extends Component {
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   console.log('this.props', this.props);
+  //   console.log('nextProps', nextProps);
+  //   console.log(nextProps.m.votes.length === this.props.m.votes.length);
+
+  //   if (nextProps.m.votes.length === this.props.m.votes.length) {
+  //     return false;
+  //   }
+  //   return true;
+  // }
+
+  handleVote = (e, data, isVoted, m) => {
+    // console.log('data', data, isVoted);
+    console.log('inding---------------------------');
+
+    const userId = localStorage.getItem('userId');
+    const paramUserId = this.props.match.params.userId || null;
+
+    if (!isVoted) {
+      this.props.createVoteMutation({
+        variables: {
+          _id: m._id,
+          userId: userId,
+        },
+        optimisticResponse: {
+          __typename: 'Mutation',
+          createVote: {
+            __typename: 'Message',
+            content: m.content,
+            userId: m.userId,
+            createdAt: m.createdAt,
+            _id: m._id,
+            owner: m.owner,
+            avatarUrl: m.avatarUrl,
+            votes: [
+              ...m.votes,
+              {
+                __typename: 'Vote',
+                userId: userId,
+              },
+            ],
+          },
+        },
+        update: (proxy, { data: { createVote } }) => {
+          console.log('proxy', proxy);
+          // optimistic data already write in the memory store??
+          const data = proxy.readQuery({
+            query: QUERY_ALL_MESSAGES,
+            variables: { skip: 0, userId: paramUserId },
+          });
+          console.log('data from previous store by createVote', data);
+          const idx = data.allMessages.findIndex(m => m._id === createVote._id);
+          console.log('data', data);
+          console.log('data.allMessages[idx]', data.allMessages[idx]);
+
+          data.allMessages[idx].votes = createVote.votes;
+
+          console.log('data', data);
+
+          proxy.writeQuery({
+            query: QUERY_ALL_MESSAGES,
+            variables: { skip: 0, userId: paramUserId },
+            data,
+          });
+        },
+        refetchQueries: refetchQueries,
+      });
+    } else {
+      // alresdy voted and find to remove
+      console.log('ss');
+
+      const idx = m.votes.findIndex(m => m.userId === userId);
+      const opsVotes = m.votes.slice().splice(idx, 1);
+      this.props.removeVoteMutation({
+        variables: {
+          _id: m._id,
+          userId: userId,
+        },
+        optimisticResponse: {
+          __typename: 'Mutation',
+          removeVote: {
+            __typename: 'Message',
+            content: m.content,
+            userId: m.userId,
+            createdAt: m.createdAt,
+            _id: m._id,
+            owner: m.owner,
+            votes: [...opsVotes],
+            avatarUrl: m.avatarUrl,
+          },
+        },
+        update: (proxy, { data: { removeVote } }) => {
+          const data = proxy.readQuery({
+            query: QUERY_ALL_MESSAGES,
+            variables: { skip: 0, userId: paramUserId },
+          });
+          console.log('enter?');
+          console.log('createVote', removeVote);
+
+          const idx = data.allMessages.findIndex(m => m._id === removeVote._id);
+
+          data.allMessages[idx].votes = removeVote.votes;
+
+          proxy.writeQuery({
+            query: QUERY_ALL_MESSAGES,
+            variables: { skip: 0, userId: paramUserId },
+            data,
+          });
+        },
+        refetchQueries: refetchQueries,
+      });
+    }
+  };
   render() {
     const { m, handleVote, handleRtClick, handleDeleteM } = this.props;
     //check if the user has been voted
@@ -13,7 +130,7 @@ class MessageItem extends Component {
     console.log('useId', userId);
     const isVoted = m.votes.findIndex(v => v.userId === userId) > -1;
     const isOwner = m.userId === userId;
-
+    console.log('singgel-----------------');
     return (
       <Item key={m._id}>
         <Item.Image src={m.avatarUrl} className="item-image" size="mini" />
@@ -32,7 +149,7 @@ class MessageItem extends Component {
           <Item.Extra>
             <Popup
               trigger={
-                <Label onClick={(e, data) => handleVote(e, data, isVoted, m)} size="tiny">
+                <Label onClick={(e, data) => this.handleVote(e, data, isVoted, m)} size="tiny">
                   <Icon name="heart" color={isVoted ? 'red' : 'grey'} />
                   {m.votes.length}
                 </Label>
@@ -118,13 +235,69 @@ const buttonStyle = {
   color: 'white',
 };
 
-const LLL = () => {
-  return (
-    <div>
-      <Icon name="retweet" />
-      15
-    </div>
-  );
-};
+const refetchQueries = [
+  {
+    query: gql`
+      query userQuery($id: String) {
+        user(id: $id) {
+          _id
+          name
+          email
+          token
+          num
+          followers {
+            _id
+          }
+          followings {
+            _id
+          }
+          hisMessages {
+            _id
+          }
+          messageCount
+          avatarUrl
+          likedMessagesCount
+        }
+      }
+    `,
+    variables: { id: localStorage.getItem('userId') },
+  },
+];
 
-export default MessageItem;
+const MUTATE_CREATE_VOTE = gql`
+  mutation createVote($_id: String!) {
+    createVote(_id: $_id) {
+      content
+      userId
+      createdAt
+      _id
+      owner
+      votes {
+        userId
+      }
+      avatarUrl
+    }
+  }
+`;
+
+const MUTATE_REMOVE_VOTE = gql`
+  mutation removeVote($_id: String!) {
+    removeVote(_id: $_id) {
+      content
+      userId
+      createdAt
+      _id
+      owner
+      votes {
+        userId
+      }
+      avatarUrl
+    }
+  }
+`;
+
+const withCreateVoteMutation = graphql(MUTATE_CREATE_VOTE, { name: 'createVoteMutation' });
+
+const withRemoveVoteMutation = graphql(MUTATE_REMOVE_VOTE, { name: 'removeVoteMutation' });
+export default compose(withCreateVoteMutation, withRemoveVoteMutation)(withRouter(MessageItem));
+// export default MessageItem;
