@@ -113,23 +113,40 @@ div.login-form {
 }
 
 /* css transition */
+.items .item {
+  display: flex;
+  flex-direction: row;
+}
 .example-enter {
   opacity: 0.01;
-  background: red;
+  background: #acdae5;
 }
 
 .example-enter.example-enter-active {
   opacity: 1;
-  background: blue;
+  background: rgba(0, 0, 0, 0);
   transition: opacity 500ms ease-in;
-  transition: background 2500ms ease-in;
+  transition: background 500ms ease-in;
 }
 
 .example-leave {
   opacity: 1;
+  background: #acdae5;
 }
 
 .example-leave.example-leave-active {
-  opacity: 0.01;
-  transition: opacity 300ms ease-in;
+  transition: background 300ms ease-in;
+}
+
+div.extra {
+  padding-top: 0.5rem;
+}
+
+.item-extra .test {
+  margin: 0 0.6rem 0 0.3rem;
+}
+
+.item-header a {
+  color: black;
+  font-size: 18px;
 }

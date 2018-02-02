@@ -337,17 +337,23 @@ class MessageContainer extends Component {
         />,
 
         <Item.Group divided key="item">
-          {allMessages.map(m => {
-            return (
-              <MessageItem
-                m={m}
-                key={m._id}
-                handleVote={this.handleVote}
-                handleRtClick={this.handleRtClick}
-                handleDeleteM={this.handleDeleteM}
-              />
-            );
-          })}
+          <ReactCSSTransitionGroup
+            transitionName="example"
+            transitionEnterTimeout={500}
+            transitionLeaveTimeout={300}
+          >
+            {allMessages.map(m => {
+              return (
+                <MessageItem
+                  m={m}
+                  key={m._id}
+                  handleVote={this.handleVote}
+                  handleRtClick={this.handleRtClick}
+                  handleDeleteM={this.handleDeleteM}
+                />
+              );
+            })}
+          </ReactCSSTransitionGroup>
         </Item.Group>,
 
         <Button onClick={this.handleLoadMore} loading={this.state.loadingMore} key="button">
@@ -465,7 +471,7 @@ const refetchQueries = [
 const withData = graphql(QUERY_ALL_MESSAGES, {
   name: 'allMessageQuery',
   options: props => {
-    const userId = props.match.params.userId ? props.match.params.userId : null;
+    const userId = props.match.params.userId || null;
 
     return {
       variables: {

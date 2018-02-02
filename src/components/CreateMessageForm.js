@@ -38,24 +38,24 @@ class CreateMessageForm extends Component {
       variables: {
         content: value,
       },
-      optimisticResponse: {
-        __typename: 'Mutation',
-        createMessage: {
-          __typename: 'MessageResponse',
-          ok: true,
-          error: null,
-          message: {
-            __typename: 'Message',
-            _id: +new Date(),
-            userId: 'faked id',
-            content: value,
-            createdAt: +new Date(),
-            votes: [],
-            owner: localStorage.getItem('name'),
-            avatarUrl: localStorage.getItem('avatarUrl'),
-          },
-        },
-      },
+      // optimisticResponse: {
+      //   __typename: 'Mutation',
+      //   createMessage: {
+      //     __typename: 'MessageResponse',
+      //     ok: true,
+      //     error: null,
+      //     message: {
+      //       __typename: 'Message',
+      //       _id: +new Date(),
+      //       userId: 'faked id',
+      //       content: value,
+      //       createdAt: +new Date(),
+      //       votes: [],
+      //       owner: localStorage.getItem('name'),
+      //       avatarUrl: localStorage.getItem('avatarUrl'),
+      //     },
+      //   },
+      // },
       update: (proxy, { data: { createMessage } }) => {
         console.log('proxy', proxy);
 
@@ -95,7 +95,7 @@ class CreateMessageForm extends Component {
           <Form.Field
             control={TextArea}
             label="你在做什么"
-            placeholder="Tell us more about you..."
+            placeholder="..."
             value={this.state.value}
             onChange={this.handleChange}
           />

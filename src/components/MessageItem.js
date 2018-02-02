@@ -8,6 +8,7 @@ import { QUERY_ALL_MESSAGES } from './MessageContainer';
 import { graphql, withApollo, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 import { withRouter } from 'react-router-dom';
+import styled from 'styled-components';
 
 class MessageItem extends Component {
   // shouldComponentUpdate(nextProps, nextState) {
@@ -131,12 +132,96 @@ class MessageItem extends Component {
     const isVoted = m.votes.findIndex(v => v.userId === userId) > -1;
     const isOwner = m.userId === userId;
     console.log('singgel-----------------');
-    return (
-      <Item key={m._id}>
-        <Item.Image src={m.avatarUrl} className="item-image" size="mini" />
+    return [
+      // <Item key={m._id}>
+      //   <Item.Image src={m.avatarUrl} className="item-image" size="mini" />
 
-        <Item.Content>
-          <Item.Header>
+      //   <Item.Content>
+      //     <Item.Header>
+      //       <Link to={`/user/${m.userId}`}>@{m.owner}</Link>
+      //     </Item.Header>
+      //     <Item.Meta>
+      //       <Link to={`/message/${m._id}`}>
+      //         <TimeAgo date={new Date(m.createdAt).toUTCString()} live={false} />
+      //       </Link>
+      //     </Item.Meta>
+      //     <Item.Description>{m.content}</Item.Description>
+
+      //     <Item.Extra>
+      //       <Popup
+      //         trigger={
+      //           <Label onClick={(e, data) => this.handleVote(e, data, isVoted, m)} size="tiny">
+      //             <Icon name="heart" color={isVoted ? 'red' : 'grey'} />
+      //             {m.votes.length}
+      //           </Label>
+      //         }
+      //         size="mini"
+      //         content={isVoted ? '取消' : '喜欢'}
+      //         position="top center"
+      //         inverted
+      //       />
+      //       <Popup
+      //         trigger={
+      //           <Label
+      //             onClick={(e, data) => handleRtClick(e, data, m)}
+      //             size="tiny"
+      //             className="test"
+      //           >
+      //             <Icon name="retweet" />
+      //           </Label>
+      //         }
+      //         size="mini"
+      //         content={'转发'}
+      //         position="top center"
+      //         inverted
+      //       />
+      //       {/* <Label onClick={(e, data) => handleVote(e, data, isVoted, m)} size="mini">
+      //         <Icon name="heart" color={isVoted ? 'red' : 'grey'} />
+      //         {m.votes.length}
+      //       </Label> */}
+      //       {/* <Label>
+      //         <Icon name="reply" />
+      //         15
+      //       </Label>
+      //       <Label>
+      //         <Icon name="mail outline" />
+      //       </Label> */}
+
+      //       {isOwner && (
+      //         <Popup
+      //           trigger={
+      //             <span className="delete-icon">
+      //               <Icon name="delete" fitted />
+      //             </span>
+      //           }
+      //           content={
+      //             <Button
+      //               size="mini"
+      //               color="red"
+      //               onClick={() => handleDeleteM(m._id)}
+      //               style={buttonStyle}
+      //             >
+      //               删除
+      //             </Button>
+      //           }
+      //           hideOnScroll
+      //           size="mini"
+      //           on="click"
+      //           position="top center"
+      //           style={popupStyle}
+      //           inverted
+      //         />
+      //       )}
+      //     </Item.Extra>
+      //   </Item.Content>
+      // </Item>,
+      <div style={messageStyle}>
+        <ItemLeft>
+          <Image src={m.avatarUrl} size="tiny" />
+        </ItemLeft>
+
+        <ItemRight>
+          <Item.Header className="item-header">
             <Link to={`/user/${m.userId}`}>@{m.owner}</Link>
           </Item.Header>
           <Item.Meta>
@@ -144,9 +229,10 @@ class MessageItem extends Component {
               <TimeAgo date={new Date(m.createdAt).toUTCString()} live={false} />
             </Link>
           </Item.Meta>
-          <Item.Description>{m.content}</Item.Description>
-
-          <Item.Extra>
+          <div style={{ paddingTop: '0.3rem' }}>
+            <Item.Description>{m.content}</Item.Description>
+          </div>
+          <Item.Extra className="item-extra">
             <Popup
               trigger={
                 <Label onClick={(e, data) => this.handleVote(e, data, isVoted, m)} size="tiny">
@@ -212,11 +298,34 @@ class MessageItem extends Component {
               />
             )}
           </Item.Extra>
-        </Item.Content>
-      </Item>
-    );
+        </ItemRight>
+      </div>,
+    ];
   }
 }
+
+const ItemLeft = styled.div`
+  flex: 0 0 48px;
+  height: 48px;
+  margin-right: 1rem;
+`;
+
+const ItemRight = styled.div`
+  flex: 1;
+  padding: '1rem 2rem';
+`;
+
+const messageStyle = {
+  // background: '#acdae5',
+  padding: ' 1rem',
+  maxWidth: '768px',
+
+  textAlign: 'left',
+  // borderRadius: '1rem',
+  // border: '1px solid red',
+  display: 'flex',
+  borderBottom: '1px solid #e0e1e2',
+};
 
 const popupStyle = {
   opacity: 1,
