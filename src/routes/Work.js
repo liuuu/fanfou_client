@@ -28,7 +28,7 @@ class TimeLine extends React.Component {
     const { props } = this;
     return (
       <div className="all-message">
-        <Segment textAlign="center" style={{ minHeight: '100vh', padding: '1em 0em' }} vertical>
+        <div style={{ padding: '1em 0em' }}>
           <Container>
             <Navbar />
 
@@ -47,7 +47,7 @@ class TimeLine extends React.Component {
               </Grid>
             </div>
           </Container>
-        </Segment>
+        </div>
       </div>
     );
   }

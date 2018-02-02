@@ -27,11 +27,7 @@ class NotificationBar extends Component {
   };
   componentWillMount() {
     const userId = localStorage.getItem('userId');
-    this.unsubscribe = this.subscribe(userId);
-    this.props.client.watchQuery({
-      query: QUERY_ALL_MESSAGES,
-      variables: { skip: 0 },
-    });
+    if (userId) this.unsubscribe = this.subscribe(userId);
   }
 
   subscribe = userId => {
@@ -79,7 +75,7 @@ class NotificationBar extends Component {
     /*
     const data = cache.readQuery({
       query: QUERY_ALL_MESSAGES,
-      variables: { skip: 0 },
+      variables: { skip: 6 },
     });
     console.log('data', data);
     
@@ -92,19 +88,19 @@ class NotificationBar extends Component {
 
     cache.writeQuery({
       query: QUERY_ALL_MESSAGES,
-      variables: { skip: 0 },
+      variables: { skip: 6 },
       data: data,
     });
 
     const a = cache.readQuery({
       query: QUERY_ALL_MESSAGES,
-      variables: { skip: 0 },
+      variables: { skip: 6 },
     });
 
     console.log('a', a);
 
     this.setState({
-      content: 0,
+      content: 6,
       open: false,
     });
     */

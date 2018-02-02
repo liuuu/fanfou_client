@@ -1,41 +1,50 @@
 import React, { Component } from 'react';
-import { Menu, Button } from 'semantic-ui-react';
+import { Menu, Button, Image } from 'semantic-ui-react';
 import { Link, withRouter } from 'react-router-dom';
+import fanfou from '../fanfou_beta.png';
+
+import styled from 'styled-components';
 
 class Navbar extends Component {
   handleLogout = () => {
     localStorage.removeItem('userId');
+    localStorage.removeItem('xtoken');
     this.props.history.replace('/');
   };
   render() {
     const isLogin = localStorage.getItem('userId');
     return (
-      <Menu secondary size="large" as="div">
+      <Menu size="large" as="div" secondary className="nav-bar">
+        <Menu.Item as="a" header>
+          <Image size="small" src={fanfou} style={{ marginRight: '1.5em' }} />
+        </Menu.Item>
+
         <Menu.Item>
-          <Link to="/">Home</Link>
+          <Link to="/" style={{ color: '#59cdfb' }}>
+            首页
+          </Link>
         </Menu.Item>
         <Menu.Item>
-          <Link to="/work">Work</Link>
-        </Menu.Item>
-        <Menu.Item>
-          <Link to="/work">Compony</Link>
-        </Menu.Item>
-        <Menu.Item>
-          <Link to="/work">Career</Link>
+          <Link to="/work" style={{ color: '#59cdfb' }}>
+            微博
+          </Link>
         </Menu.Item>
 
         {isLogin ? (
           <Menu.Item position="right">
-            <Button onClick={this.handleLogout}>退出</Button>
+            <a onClick={this.handleLogout} style={{ color: '#59cdfb' }}>
+              退出
+            </a>
           </Menu.Item>
         ) : (
           <Menu.Item position="right">
-            <Button>
-              <Link to="/register">登录</Link>
-            </Button>
-            <Button style={{ marginLeft: '0.5em' }}>
-              <Link to="/register">注册</Link>
-            </Button>
+            <Link to="/register" style={{ color: '#59cdfb' }}>
+              登录/
+            </Link>
+
+            <Link to="/register" style={{ color: '#59cdfb' }}>
+              注册
+            </Link>
           </Menu.Item>
         )}
       </Menu>

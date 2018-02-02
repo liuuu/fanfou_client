@@ -12,9 +12,8 @@
 }
 
 .all-message {
-  height: 100vh;
-  overflow: auto;
   background: #e6ecf1;
+  min-height: 100vh;
   /* background: url(http://static.fanfou.com/img/bg/3.jpg) repeat; */
 }
 
@@ -72,4 +71,41 @@ div.image.item-image {
 
 .noti-button {
   margin-top: 0.1rem;
+}
+
+/* nav-bar */
+.nav-bar {
+  background-image: linear-gradient(312deg, #14134e 0%, #512d5a 68%, #843b61 100%);
+}
+
+.nav a {
+  color: '#acdae5';
+}
+
+.nav-bar div a:hover {
+  color: #fff;
+}
+
+.nav-bar div {
+  background: #fff;
+}
+
+/* login page */
+
+div.login-form {
+  height: 100vh;
+  text-align: center;
+  background-color: #e6ecf1;
+}
+
+.ui.header > .image:not(.icon),
+.ui.header > img {
+  width: 10.5rem;
+}
+
+/* show password */
+.show-pass {
+  position: fixed;
+  left: 2rem;
+  bottom: 2rem;
 }

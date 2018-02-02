@@ -34,6 +34,7 @@ class MessageContainer extends Component {
   state = {
     open: false,
     loadingMore: false,
+    hasMore: true,
   };
   // componentWillMount() {
   //   const userId = localStorage.getItem('userId');
@@ -83,10 +84,10 @@ class MessageContainer extends Component {
     });
 
     const num = this.props.allMessageQuery.allMessages.length + this.notiCounts;
-    // console.log('num', num);
+    console.log('num', num);
     // localStorage.setItem('num', num);
     const userId = this.props.match.params.userId ? this.props.match.params.userId : null;
-    await this.props.allMessageQuery.fetchMore({
+    const result = await this.props.allMessageQuery.fetchMore({
       variables: {
         skip: num,
         userId: userId,
@@ -104,9 +105,18 @@ class MessageContainer extends Component {
         };
       },
     });
-    this.setState({
-      loadingMore: false,
-    });
+    console.log('result', result);
+    if (result.data.allMessages.length === 0) {
+      this.setState({
+        loadingMore: false,
+        hasMore: false,
+      });
+    } else {
+      this.setState({
+        loadingMore: false,
+        hasMore: true,
+      });
+    }
   };
 
   handleVote = (e, data, isVoted, m) => {
@@ -336,7 +346,7 @@ class MessageContainer extends Component {
           })}
         </Item.Group>,
         <Button onClick={this.handleLoadMore} loading={this.state.loadingMore} key="button">
-          {this.state.loadingMore ? '正在加载' : '加载更多'}
+          {this.state.hasMore ? '加载更多' : '没有更多了'}
         </Button>,
         open && (
           <MessageModal

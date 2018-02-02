@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import { Button, Form, Grid, Header, Image, Message, Segment } from 'semantic-ui-react';
+import { Button, Form, Grid, Header, Image, Message, Segment, Icon } from 'semantic-ui-react';
 import logo from '../logo.svg';
 import { observable, action, computed } from 'mobx';
 import { observer } from 'mobx-react';
 import gql from 'graphql-tag';
 import { graphql, compose } from 'react-apollo';
+import fanfou from '../fanfou_beta.png';
 
 @observer
 class LoginForm extends Component {
@@ -44,11 +45,17 @@ class LoginForm extends Component {
       this.error = false;
     }
   };
+  @action
+  handleLazy = () => {
+    this.password = 'test';
+    this.email = 'test@gmail.com';
+  };
 
-  saveUserData = (id, token, avatarUrl) => {
+  saveUserData = (id, token, avatarUrl, name) => {
     localStorage.setItem('xtoken', token);
     localStorage.setItem('userId', id);
-    localStorage.setItem('avatartUrl', avatarUrl);
+    localStorage.setItem('avatarUrl', avatarUrl);
+    localStorage.setItem('name', name);
   };
 
   handleSubmit = async () => {
@@ -62,10 +69,12 @@ class LoginForm extends Component {
         },
       });
 
-      console.log('login result', result);
-
-      const { user, ok, error, avatarUrl } = result.data.login;
-      this.saveUserData(user._id, user.token, user.avatarUrl);
+      const { user, ok, error } = result.data.login;
+      if (error) {
+        return alert(error);
+      }
+      this.saveUserData(user._id, user.token, user.avatarUrl, user.name);
+      this.props.history.push('/work');
     } else {
       // sign up process
       const result = await this.props.signupUserMutation({
@@ -78,7 +87,11 @@ class LoginForm extends Component {
       console.log('sign result', result);
 
       const { user, ok, error } = result.data.signup;
-      this.saveUserData(user._id, user.token, user.avatarUrl);
+      if (error) {
+        return alert(error);
+      }
+      this.saveUserData(user._id, user.token, user.avatarUrl, user.name);
+      this.props.history.push('/work');
     }
     // this.props.history.push('/');
   };
@@ -94,10 +107,14 @@ class LoginForm extends Component {
     return (
       <div className="login-form">
         {this.isLoginForm && (
-          <Grid textAlign="center" style={{ height: '100%' }} verticalAlign="middle">
+          <Grid
+            style={{ height: '100%', margin: '0 auto', paddingTop: '100px' }}
+            textAlign="center"
+            // verticalAlign="middle"
+          >
             <Grid.Column style={{ maxWidth: 450 }}>
               <Header as="h2" color="teal" textAlign="center">
-                <Image src={logo} /> Welcome
+                <Image size="massive" src={fanfou} />
               </Header>
               <Form size="large">
                 <Segment stacked>
@@ -120,18 +137,23 @@ class LoginForm extends Component {
                   />
 
                   <Button color="teal" fluid size="large" onClick={this.handleSubmit}>
-                    Login
+                    登录
                   </Button>
                 </Segment>
               </Form>
+              <ChooseForm handleChoose={this.handleChoose} isLoginForm={this.isLoginForm} />
             </Grid.Column>
           </Grid>
         )}
         {!this.isLoginForm && (
-          <Grid textAlign="center" style={{ height: '100%' }} verticalAlign="middle">
+          <Grid
+            textAlign="center"
+            style={{ height: '100%', margin: '0 auto', paddingTop: '100px' }}
+            // verticalAlign="middle"
+          >
             <Grid.Column style={{ maxWidth: 450 }}>
               <Header as="h2" color="teal" textAlign="center">
-                <Image src={logo} /> Log-in to your account
+                <Image size="massive" src={fanfou} />
               </Header>
               <Form size="large">
                 <Segment stacked>
@@ -174,20 +196,33 @@ class LoginForm extends Component {
                   />
 
                   <Button
-                    color="teal"
                     fluid
+                    color="teal"
                     size="large"
                     disabled={this.error}
                     onClick={this.handleSubmit}
                   >
-                    {this.isLoginForm ? 'login' : 'signup'}
+                    {this.isLoginForm ? '登录' : '注册'}
                   </Button>
                 </Segment>
               </Form>
+              <ChooseForm handleChoose={this.handleChoose} isLoginForm={this.isLoginForm} />
             </Grid.Column>
           </Grid>
         )}
-        <ChooseForm handleChoose={this.handleChoose} isLoginForm={this.isLoginForm} />
+        <div className="show-pass">
+          <Button color="facebook">
+            <Icon name="mail" /> test@gmail.com
+          </Button>
+          <Button color="twitter">
+            <Icon name="lock" /> test
+          </Button>
+          {this.isLoginForm && (
+            <Button color="twitter" color="green" onClick={this.handleLazy}>
+              不想打字? 点击我
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
@@ -195,15 +230,14 @@ class LoginForm extends Component {
 
 const ChooseForm = ({ handleChoose, isLoginForm }) => {
   return (
-    <div>
-      <Grid textAlign="center" style={{ height: '100%' }} verticalAlign="middle">
-        <Grid.Column style={{ maxWidth: 450 }}>
-          <Message>
-            New to us? <button onClick={handleChoose}>{isLoginForm ? 'signUp' : 'signIn'}</button>
-          </Message>
-        </Grid.Column>
-      </Grid>
-    </div>
+    <Message>
+      {!isLoginForm ? `已有账号?` : `新用户?`}
+      {!isLoginForm ? (
+        <button onClick={handleChoose}>登录</button>
+      ) : (
+        <button onClick={handleChoose}>注册</button>
+      )}
+    </Message>
   );
 };
 
@@ -215,7 +249,7 @@ const SIGNUP_USER_MUTATION = gql`
         _id
         token
         email
-        num
+        avatarUrl
       }
       ok
       error
@@ -231,7 +265,8 @@ const AUTHENTICATE_USER_MUTATION = gql`
         _id
         token
         email
-        num
+
+        avatarUrl
       }
       ok
       error

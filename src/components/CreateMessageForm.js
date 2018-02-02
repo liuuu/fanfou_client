@@ -32,7 +32,7 @@ class CreateMessageForm extends Component {
       return;
     }
 
-    // not work cause the readQuery only require the `root` query as the skip:0 intererting
+    // not work cause the readQuery only require the `root` query as the skip:6 intererting
 
     const result = this.props.createMessageMutation({
       variables: {
@@ -80,6 +80,10 @@ class CreateMessageForm extends Component {
         });
       },
       refetchQueries: refetchQueries,
+    });
+    this.setState({
+      value: '',
+      percent: 0,
     });
   };
   render() {

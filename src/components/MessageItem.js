@@ -78,7 +78,12 @@ class MessageItem extends Component {
                   </span>
                 }
                 content={
-                  <Button size="mini" color="red" onClick={() => handleDeleteM(m._id)}>
+                  <Button
+                    size="mini"
+                    color="red"
+                    onClick={() => handleDeleteM(m._id)}
+                    style={buttonStyle}
+                  >
                     删除
                   </Button>
                 }
@@ -100,14 +105,17 @@ class MessageItem extends Component {
 const popupStyle = {
   opacity: 1,
   padding: '0.35rem',
+  background: 'rgba(0, 0, 0, 1)',
 };
 
 const buttonStyle = {
   background: 'red',
   border: 'none',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItem: 'center',
+  // display: 'flex',
+  // justifyContent: 'center',
+  // alignItems: 'center',
+  padding: '0.1rem, 0.2rem',
+  margin: 0,
   color: 'white',
 };
 

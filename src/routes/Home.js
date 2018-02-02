@@ -13,6 +13,7 @@ import {
   Visibility,
 } from 'semantic-ui-react';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 export default class HomepageLayout extends Component {
   state = {};
@@ -23,45 +24,30 @@ export default class HomepageLayout extends Component {
         <Segment
           inverted
           textAlign="center"
-          style={{ minHeight: 100, padding: '1em 0em' }}
+          style={{ minHeight: '100vh', padding: '1em 0em' }}
           vertical
         >
           <Container>
-            <Menu pointing secondary size="large">
-              <Menu.Item>
-                <Link to="/">Home</Link>
-              </Menu.Item>
-              <Menu.Item>
-                <Link to="/work">Work</Link>
-              </Menu.Item>
-              <Menu.Item>
-                <Link to="/work">Compony</Link>
-              </Menu.Item>
-              <Menu.Item>
-                <Link to="/work">Career</Link>
-              </Menu.Item>
-              <Menu.Item position="right">
-                <Button>Log in</Button>
-                <Button style={{ marginLeft: '0.5em' }}>Sign Up</Button>
-              </Menu.Item>
-            </Menu>
+            <Navbar />
           </Container>
 
           <Container text>
             <Header
               as="h1"
-              content="Imagine-a-Company"
+              content="饭否"
               inverted
               style={{ fontSize: '4em', fontWeight: 'normal', marginBottom: 0, marginTop: '3em' }}
             />
             <Header
               as="h2"
-              content="Do whatever you want when you want to."
               inverted
+              content="饭否，随时随地记录与分享!"
               style={{ fontSize: '1.7em', fontWeight: 'normal' }}
             />
             <Button primary size="huge">
-              Get Started
+              <Link to="/register" style={{ color: '#FFF' }}>
+                立即注册
+              </Link>
               <Icon name="right arrow" />
             </Button>
           </Container>
