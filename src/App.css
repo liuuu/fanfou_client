@@ -11,6 +11,10 @@
   cursor: pointer;
 }
 
+.like-icon {
+  cursor: pointer;
+}
+
 .all-message {
   background: #e6ecf1;
   min-height: 100vh;
@@ -36,6 +40,10 @@
   }
 }
 
+.delete-icon {
+  color: grey;
+  cursor: pointer;
+}
 .delete-icon:hover {
   color: rgb(0, 110, 255);
 }
@@ -82,10 +90,14 @@ div.image.item-image {
 
 .nav a {
   color: '#acdae5';
+  cursor: pointer;
 }
 
 .nav-bar div a:hover {
   color: #fff;
+}
+.nav-bar div a {
+  cursor: pointer;
 }
 
 .nav-bar div {

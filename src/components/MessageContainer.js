@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Item, Label, Button, Divider, Loader, Segment } from 'semantic-ui-react';
+import { Item, Label, Button, Divider, Loader, Segment, Header } from 'semantic-ui-react';
 import { graphql, withApollo, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 import TimeAgo from 'react-timeago';
@@ -326,15 +326,21 @@ class MessageContainer extends Component {
       const { allMessages } = this.props.allMessageQuery;
       const open = this.state.open;
       return [
-        !(this.props.match && this.props.match.params.userId) && (
-          <CreateMessageForm key="create-form" />
+        !this.props.match.params.userId && <CreateMessageForm key="create-form" />,
+        this.props.match.params.userId && (
+          <Header as="h2" key="noti">
+            他/她的weibo
+          </Header>
         ),
-        <NotificationBar
-          key="noti"
-          allMessageQuery={this.props.allMessageQuery}
-          ref={node => (this.notibar = node)}
-          saveCounts={this.saveCounts}
-        />,
+
+        !this.props.match.params.userId && (
+          <NotificationBar
+            key="noti"
+            allMessageQuery={this.props.allMessageQuery}
+            ref={node => (this.notibar = node)}
+            saveCounts={this.saveCounts}
+          />
+        ),
 
         <Item.Group divided key="item">
           <ReactCSSTransitionGroup
@@ -478,6 +484,8 @@ const withData = graphql(QUERY_ALL_MESSAGES, {
         skip: 0,
         userId: userId,
       },
+      //  this can be commented to make the the address back and forth not fetch data
+      // or probably can operate the another readQuery as well
       fetchPolicy: 'network-only',
     };
   },

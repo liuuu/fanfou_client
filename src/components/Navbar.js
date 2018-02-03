@@ -31,11 +31,16 @@ class Navbar extends Component {
         </Menu.Item>
 
         {isLogin ? (
-          <Menu.Item position="right">
-            <a onClick={this.handleLogout} style={{ color: '#59cdfb' }}>
-              退出
-            </a>
-          </Menu.Item>
+          [
+            <Menu.Item position="right" key="bar-image">
+              <Image src={localStorage.getItem('avatarUrl')} size="mini" circular />
+            </Menu.Item>,
+            <Menu.Item key="bar-logout">
+              <a onClick={this.handleLogout} style={{ color: '#59cdfb' }}>
+                退出
+              </a>
+            </Menu.Item>,
+          ]
         ) : (
           <Menu.Item position="right">
             <Link to="/register" style={{ color: '#59cdfb' }}>
