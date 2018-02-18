@@ -9,7 +9,7 @@ import { graphql, withApollo, compose } from 'react-apollo';
 import gql from 'graphql-tag';
 import { withRouter } from 'react-router-dom';
 
-class MessageItem extends Component {
+class MessageItem extends React.PureComponent {
   // shouldComponentUpdate(nextProps, nextState) {
   //   console.log('this.props', this.props);
   //   console.log('nextProps', nextProps);
@@ -20,6 +20,16 @@ class MessageItem extends Component {
   //   }
   //   return true;
   // }
+
+  componentWillUpdate(nextProps) {
+    // console.log('this.props', this.props);
+    // console.log('nextProps', nextProps);
+    if (this.props.m.votes.length === nextProps.m.votes.length) {
+      return false;
+    }
+    const a = nextProps === this.props;
+    console.log(a);
+  }
 
   handleVote = (e, data, isVoted, m) => {
     // console.log('data', data, isVoted);

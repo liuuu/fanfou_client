@@ -32,7 +32,7 @@ class MessageContainer extends Component {
         }
 
         return {
-          ...prev,
+          // ...prev,
           allMessages: [...prev.allMessages, ...fetchMoreResult.allMessages],
         };
       },
@@ -53,6 +53,101 @@ class MessageContainer extends Component {
 
   handleVote = (e, data, isVoted, m) => {
     // console.log('data', data, isVoted);
+    const userId = this.props.match.params.userId ? this.props.match.params.userId : null;
+    console.log('userId-----------', userId);
+
+    if (!isVoted) {
+      this.props.createVoteMutation({
+        variables: {
+          _id: m._id,
+          userId: userId,
+        },
+        optimisticResponse: {
+          __typename: 'Mutation',
+          createVote: {
+            __typename: 'Message',
+            content: m.content,
+            userId: m.userId,
+            createdAt: m.createdAt,
+            _id: m._id,
+            owner: m.owner,
+            avatarUrl: m.avatarUrl,
+            votes: [
+              ...m.votes,
+              {
+                __typename: 'Vote',
+                userId: userId,
+              },
+            ],
+          },
+        },
+        update: (proxy, { data: { createVote } }) => {
+          const data = proxy.readQuery({
+            query: QUERY_ALL_MESSAGES,
+            variables: { skip: 0, userId: userId },
+          });
+          console.log('data from previous store by createVote', data);
+          const idx = data.allMessages.findIndex(m => m._id === createVote._id);
+          console.log('data', data);
+          console.log('data.allMessages[idx]', data.allMessages[idx]);
+
+          data.allMessages[idx].votes = createVote.votes;
+
+          console.log('data', data);
+
+          proxy.writeQuery({
+            query: QUERY_ALL_MESSAGES,
+            variables: { skip: 0, userId: userId },
+            data,
+          });
+        },
+        // refetchQueries: refetchQueries,
+      });
+    } else {
+      // alresdy voted and find to remove
+      console.log('ss');
+
+      const idx = m.votes.findIndex(m => m.userId === userId);
+      const opsVotes = m.votes.slice().splice(idx, 1);
+      this.props.removeVoteMutation({
+        variables: {
+          _id: m._id,
+          userId: userId,
+        },
+        optimisticResponse: {
+          __typename: 'Mutation',
+          removeVote: {
+            __typename: 'Message',
+            content: m.content,
+            userId: m.userId,
+            createdAt: m.createdAt,
+            _id: m._id,
+            owner: m.owner,
+            votes: [...opsVotes],
+            avatarUrl: m.avatarUrl,
+          },
+        },
+        update: (proxy, { data: { removeVote } }) => {
+          const data = proxy.readQuery({
+            query: QUERY_ALL_MESSAGES,
+            variables: { skip: 0, userId: userId },
+          });
+          console.log('enter?');
+          console.log('createVote', removeVote);
+
+          const idx = data.allMessages.findIndex(m => m._id === removeVote._id);
+
+          data.allMessages[idx].votes = removeVote.votes;
+
+          proxy.writeQuery({
+            query: QUERY_ALL_MESSAGES,
+            variables: { skip: 0, userId: userId },
+            data,
+          });
+        },
+        // refetchQueries: refetchQueries,
+      });
+    }
   };
 
   render() {
@@ -125,4 +220,63 @@ const withData = graphql(QUERY_ALL_MESSAGES, {
   },
 });
 
-export default withRouter(compose(withData)(MessageContainer));
+const MUTATE_CREATE_VOTE = gql`
+  mutation createVote($_id: String!) {
+    createVote(_id: $_id) {
+      content
+      userId
+      createdAt
+      _id
+      owner
+      votes {
+        userId
+      }
+      avatarUrl
+    }
+  }
+`;
+const MUTATE_REMOVE_VOTE = gql`
+  mutation removeVote($_id: String!) {
+    removeVote(_id: $_id) {
+      content
+      userId
+      createdAt
+      _id
+      owner
+      votes {
+        userId
+      }
+      avatarUrl
+    }
+  }
+`;
+
+const MUTATE_DELETE_MESSAGE = gql`
+  mutation removeMessage($_id: String!) {
+    removeMessage(_id: $_id) {
+      ok
+      error
+      message {
+        _id
+        content
+        createdAt
+        userId
+        owner
+        votes {
+          userId
+        }
+        avatarUrl
+      }
+    }
+  }
+`;
+
+const withCreateVoteMutation = graphql(MUTATE_CREATE_VOTE, { name: 'createVoteMutation' });
+const withRemoveVoteMutation = graphql(MUTATE_REMOVE_VOTE, { name: 'removeVoteMutation' });
+const withRomoveMessageMutation = graphql(MUTATE_DELETE_MESSAGE, { name: 'removeMessageMutation' });
+
+export default withRouter(
+  compose(withData, withRemoveVoteMutation, withCreateVoteMutation, withRomoveMessageMutation)(
+    MessageContainer
+  )
+);
