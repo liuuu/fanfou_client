@@ -83,7 +83,13 @@ class MessageItem extends Component {
       console.log('ss');
 
       const idx = m.votes.findIndex(m => m.userId === userId);
-      const opsVotes = m.votes.slice().splice(idx, 1);
+      console.log('idx', idx);
+
+      const copyArr = m.votes.slice();
+      const removedVotes = copyArr.splice(idx, 1);
+
+      console.log('m.votes', m.votes);
+
       this.props.removeVoteMutation({
         variables: {
           _id: m._id,
@@ -98,7 +104,7 @@ class MessageItem extends Component {
             createdAt: m.createdAt,
             _id: m._id,
             owner: m.owner,
-            votes: [...opsVotes],
+            votes: [...copyArr],
             avatarUrl: m.avatarUrl,
           },
         },
