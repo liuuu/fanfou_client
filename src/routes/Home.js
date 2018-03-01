@@ -54,12 +54,12 @@ export default class HomepageLayout extends Component {
               content="饭否，随时随地记录与分享!"
               style={{ fontSize: '1.7em', fontWeight: 'normal' }}
             />
-            <Button primary size="huge">
-              <Link to="/register" style={{ color: '#FFF' }}>
+            <Link to="/register" style={{ color: '#FFF', height: '100%' }}>
+              <Button primary size="huge">
                 立即注册
-              </Link>
-              <Icon name="right arrow" />
-            </Button>
+                <Icon name="right arrow" />
+              </Button>
+            </Link>
           </Container>
         </Segment>
 

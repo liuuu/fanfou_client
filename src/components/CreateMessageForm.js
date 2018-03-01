@@ -13,13 +13,13 @@ class CreateMessageForm extends Component {
     if (e.target.value.length > 160) {
       this.setState({
         value: e.target.value.slice(0, 160),
-        percent: e.target.value.trim().length * 100 / 160,
+        percent: e.target.value.length * 100 / 160,
       });
       return;
     }
     this.setState({
-      value: e.target.value.trim(),
-      percent: e.target.value.trim().length * 100 / 160,
+      value: e.target.value,
+      percent: e.target.value.length * 100 / 160,
     });
   };
 
